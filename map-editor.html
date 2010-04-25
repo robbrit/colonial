@@ -1,0 +1,61 @@
+<html>
+<body>
+<canvas id = "main-canvas"></canvas>
+<div>
+  Selected: <img src = "images/tiles/water.png" alt = "" id = "selected-tile" />
+  <br /><br />
+  Palette:<br />
+  <img src = "images/tiles/water.png" alt = "" onclick = "selectTile('water')" />
+  <img src = "images/tiles/grass.png" alt = "" onclick = "selectTile('grass')" />
+</div>
+
+<script type = "text/javascript" src = "jquery-1.4.2.min.js"></script>
+<script type = "text/javascript" src = "tiling.js"></script>
+<script type = "text/javascript">
+var tiler = Diamond;
+var tiles = new Array();
+
+var images = {
+  water: {
+    file: "water.png",
+    image: new Image()
+  },
+  grass: {
+    file: "grass.png",
+    image: new Image()
+  }
+};
+var selected = images.water;
+
+$(function(){
+  for (var i in images){
+    images[i].image.src = "images/tiles/" + images[i].file;
+  }
+
+  for (var i = 0; i < 20; i++){
+    tiles.push(new Array());
+    for (var j = 0; j < 20; j++){
+      tiles[i].push(new Tile(j, i, (i == j ? images.water.image : images.grass.image)));
+    }
+  }
+  render();
+});
+
+$("#main-canvas").click(function(ev){
+  var pos = $(this).position();
+  var coords = tiler.toWorldCoords(ev.clientX - pos.left, ev.clientY - pos.top);
+  tiles[coords[1]][coords[0]].image = selected.image;
+  tiler.renderTile(coords[0], coords[1]);
+});
+
+function selectTile(which){
+  selected = images[which];
+  $("#selected-tile").attr("src", "images/tiles/" + selected.file);
+}
+
+function render(){
+  tiler.isometric(tiles);
+}
+</script>
+</body>
+</html>

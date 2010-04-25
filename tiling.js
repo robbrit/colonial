@@ -45,38 +45,73 @@ var Diamond = {
   isometric: function(tiles){
     this.tiles = tiles;
 
-    var jhat = Math.floor(tiles[0][0].image.height / 2);
-    var ihat = Math.floor(tiles[0][0].image.width / 2);
-    var base = jhat * tiles[0].length;
-    var context = $("#main-canvas").get(0).getContext("2d");
+    this.jhat = Math.floor(tiles[0][0].image.height / 2);
+    this.ihat = Math.floor(tiles[0][0].image.width / 2);
+    this.base = this.jhat * tiles[0].length;
+    this.context = $("#main-canvas").get(0).getContext("2d");
 
-    Tiler.setCanvasSize(jhat * (tiles[0].length + tiles.length + 1) + 1, ihat * (tiles[0].length + tiles.length));
+    if (!this.loaded){
+      Tiler.setCanvasSize(this.jhat * (tiles[0].length + tiles.length + 1) + 1, this.ihat * (tiles[0].length + tiles.length));
+      this.loaded = true;
+    }
 
     var cx, cy;
     for (var y = tiles.length - 1; y >= 0; y--){
       for (var x = tiles[y].length - 1; x >= 0; x--){
-        cy = base + y * jhat - x * jhat - ihat / 2;
-        cx = y * ihat + x * ihat;
-        context.drawImage(tiles[y][x].image, cx, cy);
+        cy = this.base + y * this.jhat - x * this.jhat - this.ihat / 2;
+        cx = y * this.ihat + x * this.ihat;
+        this.context.drawImage(tiles[y][x].image, cx, cy);
       }
     }
-    context.moveTo(0, base);
-    context.lineTo(ihat * tiles[0].length + jhat * tiles.length, base + jhat * tiles.length);
-    context.strokeStyle = "#00F";
-    context.stroke();
+  },
+
+  renderTile: function(x, y){
+    this.context.drawImage(tiles[y][x].image,
+      y * this.ihat + x * this.ihat,
+      this.base + y * this.jhat - x * this.jhat - this.ihat / 2
+    );
   },
 
   toWorldCoords: function(x, y){
-    var jhat = Math.floor(this.tiles[0][0].image.height / 2);
-    var ihat = Math.floor(this.tiles[0][0].image.width / 2);
-    var base = jhat * this.tiles[0].length;
-
-    y -= base - jhat;
+    y -= this.base - this.jhat;
 
     return [
-      Math.round(x / 2.0 / ihat - y / 2.0 / jhat),
-      Math.round(x / 2.0 / ihat + y / 2.0 / jhat) - 1
+      Math.round(x / 2.0 / this.ihat - y / 2.0 / this.jhat),
+      Math.round(x / 2.0 / this.ihat + y / 2.0 / this.jhat) - 1
     ];
+  },
+
+  isometricLines: function(){
+    this.context.strokeStyle = "#000";
+    var width = this.tiles[0].length;
+    var height = this.tiles.length;
+    var tileWidth = tiles[0][0].image.width;
+    var tileHeight = tiles[0][0].image.height;
+
+    if (!this.loaded){
+      Tiler.setCanvasSize(this.jhat * (width + height + 1) + 1, this.ihat * (width + height));
+      this.loaded = true;
+    }
+
+    var cy1, cy2, cx1, cx2;
+    for (var i = 0; i <= width; i++){
+      cy1 = this.base - i * this.jhat;
+      cy2 = this.base + height * this.jhat - i * this.jhat;
+      cx1 = i * this.ihat;
+      cx2 = height * this.ihat + i * this.ihat;
+      this.context.moveTo(cx1, cy1);
+      this.context.lineTo(cx2, cy2);
+      this.context.stroke();
+    }
+    for (var i = 0; i <= width; i++){
+      cy1 = this.base + i * this.jhat;
+      cx1 = i * this.ihat;
+      cy2 = this.base + i * this.jhat - width * this.jhat;
+      cx2 = i * this.ihat + width * this.ihat;
+      this.context.moveTo(cx1, cy1);
+      this.context.lineTo(cx2, cy2);
+      this.context.stroke();
+    }
   }
 };
 
