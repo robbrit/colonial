@@ -1,7 +1,13 @@
-function Tile(x, y, image){
+function Tile(x, y, image, type){
   this.x = x;
   this.y = y;
   this.image = image;
+  this.type = type;
+}
+
+Tile.prototype.setImage = function(what){
+  this.image = what.image;
+  this.type = what.type;
 }
 
 /*var Zigzag = {

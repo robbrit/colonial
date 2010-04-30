@@ -1,61 +1,27 @@
 <html>
+<head><title>Map Editor</title></head>
 <body>
 <canvas id = "main-canvas"></canvas>
 <div>
   Selected: <img src = "images/tiles/water.png" alt = "" id = "selected-tile" />
   <br /><br />
   Palette:<br />
-  <img src = "images/tiles/water.png" alt = "" onclick = "selectTile('water')" />
-  <img src = "images/tiles/grass.png" alt = "" onclick = "selectTile('grass')" />
+  <img src = "images/tiles/water.png" alt = "" onclick = "MapEditor.selectTile('water')" />
+  <img src = "images/tiles/grass.png" alt = "" onclick = "MapEditor.selectTile('grass')" />
+  <img src = "images/tiles/desert.png" alt = "" onclick = "MapEditor.selectTile('desert')" />
+  <img src = "images/tiles/dune.png" alt = "" onclick = "MapEditor.selectTile('dune')" />
+  <img src = "images/tiles/ore.png" alt = "" onclick = "MapEditor.selectTile('ore')" />
+  <img src = "images/tiles/swamp.png" alt = "" onclick = "MapEditor.selectTile('swamp')" />
+  <img src = "images/tiles/rock.png" alt = "" onclick = "MapEditor.selectTile('rock')" />
+  <img src = "images/tiles/tree.png" alt = "" onclick = "MapEditor.selectTile('tree')" />
+  <br />
+  <input type = "button" onclick = "MapEditor.save()" value = "Save" />
 </div>
+<div id = "output"></div>
 
 <script type = "text/javascript" src = "jquery-1.4.2.min.js"></script>
+<script type = "text/javascript" src = "json2.js"></script>
 <script type = "text/javascript" src = "tiling.js"></script>
-<script type = "text/javascript">
-var tiler = Diamond;
-var tiles = new Array();
-
-var images = {
-  water: {
-    file: "water.png",
-    image: new Image()
-  },
-  grass: {
-    file: "grass.png",
-    image: new Image()
-  }
-};
-var selected = images.water;
-
-$(function(){
-  for (var i in images){
-    images[i].image.src = "images/tiles/" + images[i].file;
-  }
-
-  for (var i = 0; i < 20; i++){
-    tiles.push(new Array());
-    for (var j = 0; j < 20; j++){
-      tiles[i].push(new Tile(j, i, (i == j ? images.water.image : images.grass.image)));
-    }
-  }
-  render();
-});
-
-$("#main-canvas").click(function(ev){
-  var pos = $(this).position();
-  var coords = tiler.toWorldCoords(ev.clientX - pos.left, ev.clientY - pos.top);
-  tiles[coords[1]][coords[0]].image = selected.image;
-  tiler.renderTile(coords[0], coords[1]);
-});
-
-function selectTile(which){
-  selected = images[which];
-  $("#selected-tile").attr("src", "images/tiles/" + selected.file);
-}
-
-function render(){
-  tiler.isometric(tiles);
-}
-</script>
+<script type = "text/javascript" src = "map-editor.js"></script>
 </body>
 </html>
