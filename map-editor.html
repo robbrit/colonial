@@ -16,6 +16,10 @@
   <img src = "images/tiles/tree.png" alt = "" onclick = "MapEditor.selectTile('tree')" />
   <br />
   <input type = "button" onclick = "MapEditor.save()" value = "Save" />
+  <br />
+  Width: <input id = "map-width" value = "20" /><br />
+  Height: <input id = "map-height" value = "20" /><br />
+  <input type = "button" onclick = "MapEditor.createTiles()" value = "Re-create" />
 </div>
 <div id = "output"></div>
 

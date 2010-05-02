@@ -2,30 +2,8 @@
 <body>
 <canvas id = "main-canvas"></canvas>
 <script type = "text/javascript" src = "jquery-1.4.2.min.js"></script>
+<script type = "text/javascript" src = "json2.js"></script>
 <script type = "text/javascript" src = "tiling.js"></script>
-<script type = "text/javascript">
-var tiler = Diamond;
-$(function(){
-  var blue = new Image();
-  blue.src = "images/tiles/water.png";
-  var green = new Image();
-  green.src = "images/tiles/grass.png";
-
-  var tiles = new Array();
-
-  for (var i = 0; i < 40; i++){
-    tiles.push(new Array());
-    for (var j = 0; j < 20; j++){
-      tiles[i].push(new Tile(j, i, (i == j ? blue : green)));
-    }
-  }
-  tiler.isometric(tiles);
-});
-
-$("#main-canvas").click(function(ev){
-  var pos = $(this).position();
-  console.log(tiler.toWorldCoords(ev.clientX - pos.left, ev.clientY - pos.top));
-});
-</script>
+<script type = "text/javascript" src = "game.js"></script>
 </body>
 </html>

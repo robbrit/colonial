@@ -1,6 +1,3 @@
-var tiler = Diamond;
-var tiles = new Array();
-
 var MapEditor = {
   mouseDown: false,
 
@@ -49,9 +46,12 @@ var MapEditor = {
 
 
   changeTile: function(x, y, what){
-    var coords = tiler.toWorldCoords(x, y);
-    tiles[coords[1]][coords[0]].setImage(what);
-    tiler.renderTile(coords[0], coords[1]);
+    var coords = MapEditor.tiler.toWorldCoords(x, y);
+
+    if (coords[0] >= 0 && coords[1] >= 0 && coords[1] < MapEditor.tiles.length && coords[0] < MapEditor.tiles[coords[1]].length){
+      MapEditor.tiles[coords[1]][coords[0]].setImage(what);
+      MapEditor.tiler.renderTile(coords[0], coords[1]);
+    }
   },
   
   selectTile: function(which){
@@ -60,12 +60,45 @@ var MapEditor = {
   },
 
   render: function (){
-    tiler.isometric(tiles);
+    MapEditor.tiler.render();
   },
 
   save: function(){
-    $("#output").html(JSON.stringify(tiles));
-  }
+    $("#output").html(JSON.stringify({
+      width: $("#map-width").val(),
+      height: $("#map-height").val(),
+      tiles: tiles
+    }));
+  },
+
+  createTiles: function(){
+    var width = parseInt($("#map-width").val());
+    var height = parseInt($("#map-height").val());
+
+    MapEditor.tiles = new Array(height);
+    for (var i = 0; i < height; i++){
+      MapEditor.tiles[i] = new Array(width);
+      for (var j = 0; j < width; j++){
+        var image = (i == j ? MapEditor.images.water : MapEditor.images.grass);
+        MapEditor.tiles[i][j] = new Tile(j, i, image.image, image.type);
+      }
+    }
+
+    MapEditor.tiler = new Diamond(MapEditor.tiles, "#main-canvas");
+    MapEditor.tiler.maxHeight = 400;
+
+    MapEditor.tiler.setCanvasSize(
+      (width + height + 1) * Math.floor(MapEditor.selected.image.height / 2),
+      (width + height) * Math.floor(MapEditor.selected.image.width / 2)
+    );
+
+    MapEditor.render();
+  },
+
+  tiler: false,
+  tiles: false,
+
+  scrollSpeed: 10
 };
 MapEditor.selected = MapEditor.images.water;
 
@@ -73,15 +106,7 @@ $(function(){
   for (var i in MapEditor.images){
     MapEditor.images[i].image.src = "images/tiles/" + MapEditor.images[i].file;
   }
-
-  for (var i = 0; i < 20; i++){
-    tiles.push(new Array());
-    for (var j = 0; j < 20; j++){
-      var image = (i == j ? MapEditor.images.water : MapEditor.images.grass);
-      tiles[i].push(new Tile(j, i, image.image, image.type));
-    }
-  }
-  MapEditor.render();
+  MapEditor.createTiles();
 });
 
 $("#main-canvas")
@@ -90,15 +115,31 @@ $("#main-canvas")
   })
   .mouseup(function(ev){
     var pos = $(this).position();
-    MapEditor.changeTile(ev.clientX - pos.left, ev.clientY - pos.top, MapEditor.selected);
+    MapEditor.changeTile(ev.clientX - pos.left + $(window).scrollLeft(),
+      ev.clientY - pos.top + $(window).scrollTop(), MapEditor.selected);
     MapEditor.mouseDown = false;
   })
   .mousemove(function(ev){
     if (MapEditor.mouseDown){
       var pos = $(this).position();
-      MapEditor.changeTile(ev.clientX - pos.left, ev.clientY - pos.top, MapEditor.selected);
+      MapEditor.changeTile(ev.clientX - pos.left + $(window).scrollLeft(),
+        ev.clientY - pos.top + $(window).scrollTop(), MapEditor.selected);
     }
   })
   .mouseout(function(ev){
     MapEditor.mouseDown = false;
+  });
+
+$(document)
+  .keypress(function(ev){
+    console.log(ev.keyCode);
+    if (ev.keyCode == 38){ // up
+      MapEditor.tiler.scroll(0, -MapEditor.scrollSpeed);
+    }else if (ev.keyCode == 39){ // right
+      MapEditor.tiler.scroll(MapEditor.scrollSpeed, 0);
+    }else if (ev.keyCode == 40){ // down
+      MapEditor.tiler.scroll(0, MapEditor.scrollSpeed);
+    }else if (ev.keyCode == 37){ // left
+      MapEditor.tiler.scroll(-MapEditor.scrollSpeed, 0);
+    }
   });
