@@ -1,8 +1,8 @@
-function Tile(x, y, image, type){
-  this.x = x;
-  this.y = y;
-  this.image = image;
+function Tile(xy, type){
+  this.xy = xy;
+  this.image = type.image;
   this.type = type;
+  this.building = false;
 }
 
 Tile.prototype.setImage = function(what){
@@ -29,9 +29,11 @@ function Diamond(tiles, element){
   this.maxHeight = 600;
 
   this.hover = false;
+  this.hoverImage = new Image();
+  this.hoverImage.src = "images/util/hover.png";
 }
 
-Diamond.prototype.render = function(){
+Diamond.prototype.render = function(area){
   if (!this.loaded){
     this.setCanvasSize(
       this.jhat * (this.tiles[0].length + this.tiles.length + 1) + 1,
@@ -39,47 +41,59 @@ Diamond.prototype.render = function(){
     this.loaded = true;
   }
 
-  this.context.fillStyle = "rgb(255, 255, 255)";
-  this.context.fillRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+  if (area === undefined){
+    area = [0, 0, this.tiles.length, this.tiles[0].length];
 
-  // draw hover box
-  if (this.hover !== false){
-    var coords = this.toScreenCoords(this.hover[0], this.hover[1]);
-    this.context.save();
-    this.context.globalCompositeOperation = "source-atop";
-    this.context.fillStyle = "rgba(255, 0, 0, 1)";
-    this.context.fillRect(coords[0], coords[1], this.ihat * 2, this.jhat * 2);
-    this.context.restore();
-  }
-
-  var draw;
-  for (var y = this.tiles.length - 1; y >= 0; y--){
-    for (var x = this.tiles[y].length - 1; x >= 0; x--){
-      draw = this.toScreenCoords(x, y);
-
-      // render if tile is visible
-      if (draw[1] < this.canvasSize.height && draw[1] + this.jhat * 2 >= 0 &&
-          draw[0] < this.canvasSize.width  && draw[0] + this.ihat * 2 >= 0){
-        if (this.hover !== false && x == this.hover[0] && y == this.hover[1]){
-          this.globalCompositeOperation = "lighter";
-        }else{
-          this.globalCompositeOperation = "source-atop";
-        }
-        this.context.drawImage(this.tiles[y][x].image, draw[0], draw[1]);
-      }
-
+    this.context.fillStyle = "rgb(255, 255, 255)";
+    this.context.fillRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+  }else{
+    if (area[0] < 0){
+      area[0] = 0;
+    }
+    if (area[2] > this.tiles[0].length){
+      area[2] = this.tiles[0].length;
+    }
+    if (area[1] < 0){
+      area[1] = 0;
+    }
+    if (area[3] > this.tiles.length){
+      area[3] = this.tiles.length;
     }
   }
+
+  var coords;
+
+  // pass 1 - draw terrain
+  for (var y = area[1]; y < area[3]; y++){
+    for (var x = area[0]; x < area[2]; x++){
+      coords = this.toScreenCoords([x, y]);
+      this.context.drawImage(this.tiles[y][x].image, coords[0], coords[1]);
+    }
+  }
+
+  //pass 2 - draw buildings
+  for (var y = area[1]; y < area[3]; y++){
+    for (var x = area[0]; x < area[2]; x++){
+      coords = this.toScreenCoords([x, y]);
+      if (this.tiles[y][x].building){
+        this.context.drawImage(this.tiles[y][x].building.image, coords[0], coords[1]);
+      }
+    }
+  }
+  // draw hover box
+  if (this.hover !== false){
+    this.colourHover();
+  }
 };
 
-Diamond.prototype.renderTile = function(x, y){
-  var coords = this.toScreenCoords(x, y);
-  this.context.drawImage(this.tiles[y][x].image, coords[0], coords[1]);
+Diamond.prototype.renderTile = function(xy){
+  var coords = this.toScreenCoords(xy);
+  this.context.drawImage(this.tiles[xy[1]][xy[0]].image, coords[0], coords[1]);
 };
 
-Diamond.prototype.toWorldCoords = function(x, y){
-  y -= this.base - this.jhat - this.anchor.top;
-  x += this.anchor.left;
+Diamond.prototype.toWorldCoords = function(xy){
+  var y = xy[1] - (this.base - this.jhat - this.anchor.top);
+  var x = xy[0] + this.anchor.left;
 
   return [
     Math.round(x / 2.0 / this.ihat - y / 2.0 / this.jhat),
@@ -87,10 +101,10 @@ Diamond.prototype.toWorldCoords = function(x, y){
   ];
 };
 
-Diamond.prototype.toScreenCoords = function(x, y){
+Diamond.prototype.toScreenCoords = function(xy){
   return [
-    y * this.ihat + x * this.ihat - this.anchor.left,
-    this.base + y * this.jhat - x * this.jhat - this.ihat / 2 - this.anchor.top
+    xy[1] * this.ihat + xy[0] * this.ihat - this.anchor.left,
+    this.base + xy[1] * this.jhat - xy[0] * this.jhat - this.ihat / 2 - this.anchor.top
   ];
 }
 
@@ -113,10 +127,32 @@ Diamond.prototype.scroll = function(dx, dy){
   this.render();
 };
 
-Diamond.prototype.setHover = function(x, y){
-  if (x !== false && x !== undefined){
-    this.hover = this.toWorldCoords(x, y);
+Diamond.prototype.setHover = function(xy){
+  var lastHover;
+  // cover up last hover spot
+  if (this.hover !== false){
+    this.colourHover(true);
+  }
+  if (xy !== false && xy !== undefined){
+    this.hover = this.toWorldCoords(xy);
+    lastHover = this.hover;
   }else{
+    lastHover = this.hover;
     this.hover = false;
   }
+  // TODO: If the mouse moves too fast, this causes tearing - need to fix
+  this.render([lastHover[0] - 3, lastHover[1] - 3, lastHover[0] + 4, lastHover[1] + 4]);
+};
+
+Diamond.prototype.colourHover = function(clear){
+  var coords = this.toScreenCoords(this.hover);
+  this.context.save();
+  if (clear){
+    this.context.globalCompositeOperation = "source-atop";
+    this.context.fillStyle = "rgb(255, 255, 255)";
+    this.context.fillRect(coords[0], coords[1], this.ihat * 3, this.jhat * 3);
+  }else{
+    this.context.drawImage(this.hoverImage, coords[0], coords[1]);
+  }
+  this.context.restore();
 };
