@@ -57,13 +57,14 @@ Diamond.prototype.render = function(){
 
 Diamond.prototype.renderTile = function(x, y){
   this.context.drawImage(this.tiles[y][x].image,
-    y * this.ihat + x * this.ihat,
-    this.base + y * this.jhat - x * this.jhat - this.ihat / 2
+    y * this.ihat + x * this.ihat - this.anchor.left,
+    this.base + y * this.jhat - x * this.jhat - this.ihat / 2 - this.anchor.top
   );
 };
 
 Diamond.prototype.toWorldCoords = function(x, y){
-  y -= this.base - this.jhat;
+  y -= this.base - this.jhat - this.anchor.top;
+  x += this.anchor.left;
 
   return [
     Math.round(x / 2.0 / this.ihat - y / 2.0 / this.jhat),
