@@ -1,4 +1,11 @@
 var Game = {
+  images: {
+    redHover: {
+      file: "util/red-hover.png",
+      image: new Image()
+    }
+  },
+
   loadTiles: function(url){
     $.getJSON(url, function(response){
       var tiles = response.tiles;
@@ -30,12 +37,24 @@ var Game = {
   },
 
   mouseMove: function(ev){
-    var pos = $("#main-canvas").position();
-    Game.tiler.setHover(Game.canvasCoords([ev.clientX, ev.clientY]));
+    if (Game.building){
+      var coords = Game.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
+
+      if (Game.tiler.inBounds(coords)){
+        var tile = Game.tiles[coords[1]][coords[0]];
+        if (tile.building || !tile.type.buildable){
+          Game.tiler.setHover(coords, Game.images.redHover);
+        }else{
+          Game.tiler.setHover(coords, Game.building);
+        }
+      }
+    }
   },
 
   mouseOut: function(ev){
-    Game.tiler.setHover();
+    if (Game.building){
+      Game.tiler.setHover();
+    }
   },
 
   canvasCoords: function(xy){
@@ -57,6 +76,9 @@ $(function(){
   }
   for (var i in Buildings){
     Buildings[i].image.src = "images/buildings/" + Buildings[i].file;
+  }
+  for (var i in Game.images){
+    Game.images[i].image.src = "images/" + Game.images[i].file;
   }
 
   Game.loadTiles("maps/bigmap.js");

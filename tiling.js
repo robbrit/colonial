@@ -35,9 +35,7 @@ function Diamond(tiles, element){
   this.maxWidth = 800;
   this.maxHeight = 600;
 
-  this.hover = false;
-  this.hoverImage = new Image();
-  this.hoverImage.src = "images/util/hover.png";
+  this.hover = {pos: false, image: false};
 }
 
 Diamond.prototype.render = function(){
@@ -115,25 +113,27 @@ Diamond.prototype.scroll = function(dx, dy){
   this.render();
 };
 
-Diamond.prototype.setHover = function(xy){
-  if (this.hover !== false){
+Diamond.prototype.setHover = function(xy, image){
+  if (this.hover.pos !== false){
     this.colourHover(true);
   }
   if (xy !== false && xy !== undefined){
-    this.hover = this.toWorldCoords(xy);
+    this.hover.pos = xy;
+    this.hover.image = image.image;
     this.colourHover();
   }else{
-    this.hover = false;
+    this.hover.pos = false;
+    this.hover.image = false;
   }
 };
 
 Diamond.prototype.colourHover = function(clear){
-  if (this.inBounds(this.hover)){
+  if (this.inBounds(this.hover.pos)){
     if (clear){
-      this.renderTile(this.hover);
+      this.renderTile(this.hover.pos);
     }else{
-      var coords = this.toScreenCoords(this.hover);
-      this.context.drawImage(this.hoverImage, coords[0], coords[1]);
+      var coords = this.toScreenCoords(this.hover.pos);
+      this.context.drawImage(this.hover.image, coords[0], coords[1]);
     }
   }
 };
