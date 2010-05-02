@@ -67,7 +67,7 @@ var MapEditor = {
     $("#output").html(JSON.stringify({
       width: $("#map-width").val(),
       height: $("#map-height").val(),
-      tiles: tiles
+      tiles: MapEditor.tiles
     }));
   },
 
@@ -96,9 +96,7 @@ var MapEditor = {
   },
 
   tiler: false,
-  tiles: false,
-
-  scrollSpeed: 10
+  tiles: false
 };
 MapEditor.selected = MapEditor.images.water;
 
@@ -132,14 +130,13 @@ $("#main-canvas")
 
 $(document)
   .keypress(function(ev){
-    console.log(ev.keyCode);
     if (ev.keyCode == 38){ // up
-      MapEditor.tiler.scroll(0, -MapEditor.scrollSpeed);
+      MapEditor.tiler.scroll(0, -Common.scrollSpeed);
     }else if (ev.keyCode == 39){ // right
-      MapEditor.tiler.scroll(MapEditor.scrollSpeed, 0);
+      MapEditor.tiler.scroll(Common.scrollSpeed, 0);
     }else if (ev.keyCode == 40){ // down
-      MapEditor.tiler.scroll(0, MapEditor.scrollSpeed);
+      MapEditor.tiler.scroll(0, Common.scrollSpeed);
     }else if (ev.keyCode == 37){ // left
-      MapEditor.tiler.scroll(-MapEditor.scrollSpeed, 0);
+      MapEditor.tiler.scroll(-Common.scrollSpeed, 0);
     }
   });

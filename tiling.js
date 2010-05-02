@@ -27,6 +27,8 @@ function Diamond(tiles, element){
 
   this.maxWidth = 800;
   this.maxHeight = 600;
+
+  this.hover = false;
 }
 
 Diamond.prototype.render = function(){
@@ -40,26 +42,39 @@ Diamond.prototype.render = function(){
   this.context.fillStyle = "rgb(255, 255, 255)";
   this.context.fillRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 
-  var cx, cy;
+  // draw hover box
+  if (this.hover !== false){
+    var coords = this.toScreenCoords(this.hover[0], this.hover[1]);
+    this.context.save();
+    this.context.globalCompositeOperation = "source-atop";
+    this.context.fillStyle = "rgba(255, 0, 0, 1)";
+    this.context.fillRect(coords[0], coords[1], this.ihat * 2, this.jhat * 2);
+    this.context.restore();
+  }
+
+  var draw;
   for (var y = this.tiles.length - 1; y >= 0; y--){
     for (var x = this.tiles[y].length - 1; x >= 0; x--){
-      cy = this.base + y * this.jhat - x * this.jhat - this.ihat / 2 - this.anchor.top;
-      cx = y * this.ihat + x * this.ihat - this.anchor.left;
+      draw = this.toScreenCoords(x, y);
 
       // render if tile is visible
-      if (cy < this.canvasSize.height && cy + this.jhat * 2 >= 0 &&
-          cx < this.canvasSize.width  && cx + this.ihat * 2 >= 0){
-        this.context.drawImage(this.tiles[y][x].image, cx, cy);
+      if (draw[1] < this.canvasSize.height && draw[1] + this.jhat * 2 >= 0 &&
+          draw[0] < this.canvasSize.width  && draw[0] + this.ihat * 2 >= 0){
+        if (this.hover !== false && x == this.hover[0] && y == this.hover[1]){
+          this.globalCompositeOperation = "lighter";
+        }else{
+          this.globalCompositeOperation = "source-atop";
+        }
+        this.context.drawImage(this.tiles[y][x].image, draw[0], draw[1]);
       }
+
     }
   }
 };
 
 Diamond.prototype.renderTile = function(x, y){
-  this.context.drawImage(this.tiles[y][x].image,
-    y * this.ihat + x * this.ihat - this.anchor.left,
-    this.base + y * this.jhat - x * this.jhat - this.ihat / 2 - this.anchor.top
-  );
+  var coords = this.toScreenCoords(x, y);
+  this.context.drawImage(this.tiles[y][x].image, coords[0], coords[1]);
 };
 
 Diamond.prototype.toWorldCoords = function(x, y){
@@ -71,6 +86,13 @@ Diamond.prototype.toWorldCoords = function(x, y){
     Math.round(x / 2.0 / this.ihat + y / 2.0 / this.jhat) - 1
   ];
 };
+
+Diamond.prototype.toScreenCoords = function(x, y){
+  return [
+    y * this.ihat + x * this.ihat - this.anchor.left,
+    this.base + y * this.jhat - x * this.jhat - this.ihat / 2 - this.anchor.top
+  ];
+}
 
 Diamond.prototype.setCanvasSize = function(height, width){
   this.height = height;
@@ -89,4 +111,12 @@ Diamond.prototype.scroll = function(dx, dy){
   this.anchor.left = Math.max(Math.min(this.anchor.left + dx, this.width  - this.canvasSize.width ), 0);
   this.anchor.top  = Math.max(Math.min(this.anchor.top  + dy, this.height - this.canvasSize.height), 0);
   this.render();
+};
+
+Diamond.prototype.setHover = function(x, y){
+  if (x !== false && x !== undefined){
+    this.hover = this.toWorldCoords(x, y);
+  }else{
+    this.hover = false;
+  }
 };

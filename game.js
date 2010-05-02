@@ -68,10 +68,19 @@ var Game = {
   onClick: function(ev){
   },
 
-  tiles: false,
-  tiler: false,
+  mouseMove: function(ev){
+    var pos = $("#main-canvas").position();
+    Game.tiler.setHover(ev.clientX - pos.left + $(window).scrollLeft(),
+      ev.clientY - pos.top + $(window).scrollTop());
+    Game.tiler.render();
+  },
 
-  scrollSpeed: 10
+  mouseOut: function(ev){
+    Game.tiler.setHover();
+  },
+
+  tiles: false,
+  tiler: false
 };
 
 $(function(){
@@ -79,21 +88,23 @@ $(function(){
     Game.images[i].image.src = "images/tiles/" + Game.images[i].file;
   }
 
-  Game.loadTiles("maps/main.js");
+  Game.loadTiles("maps/bigmap.js");
 });
 
 $("#main-canvas")
-  .click(Game.onClick);
+  .click(Game.onClick)
+  .mousemove(Game.mouseMove)
+  .mouseout(Game.mouseOut);
 
 $(document)
   .keypress(function(ev){
     if (ev.keyCode == 38){ // up
-      Game.tiler.scroll(0, -Game.scrollSpeed);
+      Game.tiler.scroll(0, -Common.scrollSpeed);
     }else if (ev.keyCode == 39){ // right
-      Game.tiler.scroll(Game.scrollSpeed, 0);
+      Game.tiler.scroll(Common.scrollSpeed, 0);
     }else if (ev.keyCode == 40){ // down
-      Game.tiler.scroll(0, Game.scrollSpeed);
+      Game.tiler.scroll(0, Common.scrollSpeed);
     }else if (ev.keyCode == 37){ // left
-      Game.tiler.scroll(-Game.scrollSpeed, 0);
+      Game.tiler.scroll(-Common.scrollSpeed, 0);
     }
   });
