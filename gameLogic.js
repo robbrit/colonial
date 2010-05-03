@@ -19,7 +19,7 @@ GameLogic.population = new Array();
 
 function Immigrant(start, target){
   this.location = start;
-  this.path = AI.AStar(start, target.xy);
+  this.path = AI.AStar(this, start, target.xy);
 }
 
 Immigrant.prototype.update = function(){
