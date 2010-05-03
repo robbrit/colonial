@@ -1,61 +1,17 @@
 var MapEditor = {
   mouseDown: false,
 
-  images: {
-    water: {
-      file: "water.png",
-      image: new Image(),
-      type: "water"
-    },
-    grass: {
-      file: "grass.png",
-      image: new Image(),
-      type: "grass"
-    },
-    desert: {
-      file: "desert.png",
-      image: new Image(),
-      type: "desert"
-    },
-    dune: {
-      file: "dune.png",
-      image: new Image(),
-      type: "dune"
-    },
-    ore: {
-      file: "ore.png",
-      image: new Image(),
-      type: "ore"
-    },
-    rock: {
-      file: "rock.png",
-      image: new Image(),
-      type: "rock"
-    },
-    tree: {
-      file: "tree.png",
-      image: new Image(),
-      type: "tree"
-    },
-    swamp: {
-      file: "swamp.png",
-      image: new Image(),
-      type: "swamp"
-    }
-  },
-
-
   changeTile: function(x, y, what){
-    var coords = MapEditor.tiler.toWorldCoords(x, y);
+    var coords = MapEditor.tiler.toWorldCoords([x, y]);
 
     if (coords[0] >= 0 && coords[1] >= 0 && coords[1] < MapEditor.tiles.length && coords[0] < MapEditor.tiles[coords[1]].length){
       MapEditor.tiles[coords[1]][coords[0]].setImage(what);
-      MapEditor.tiler.renderTile(coords[0], coords[1]);
+      MapEditor.tiler.renderTile(coords);
     }
   },
   
   selectTile: function(which){
-    MapEditor.selected = MapEditor.images[which];
+    MapEditor.selected = TileTypes[which];
     $("#selected-tile").attr("src", "images/tiles/" + MapEditor.selected.file);
   },
 
@@ -64,6 +20,7 @@ var MapEditor = {
   },
 
   save: function(){
+    // TODO: don't need to save types
     $("#output").html(JSON.stringify({
       width: $("#map-width").val(),
       height: $("#map-height").val(),
@@ -79,8 +36,8 @@ var MapEditor = {
     for (var i = 0; i < height; i++){
       MapEditor.tiles[i] = new Array(width);
       for (var j = 0; j < width; j++){
-        var image = (i == j ? MapEditor.images.water : MapEditor.images.grass);
-        MapEditor.tiles[i][j] = new Tile(j, i, image.image, image.type);
+        var image = (i == j ? TileTypes.water : TileTypes.grass);
+        MapEditor.tiles[i][j] = new Tile([j, i], image);
       }
     }
 
@@ -98,12 +55,12 @@ var MapEditor = {
   tiler: false,
   tiles: false
 };
-MapEditor.selected = MapEditor.images.water;
-
 $(function(){
-  for (var i in MapEditor.images){
-    MapEditor.images[i].image.src = "images/tiles/" + MapEditor.images[i].file;
+  for (var i in TileTypes){
+    TileTypes[i].image.src = "images/tiles/" + TileTypes[i].file;
   }
+  MapEditor.selected = TileTypes.water;
+
   MapEditor.createTiles();
 });
 

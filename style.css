@@ -1,5 +1,7 @@
 canvas {
   float: left;
+  border: 1px solid black;
+  background-color: black;
 }
 
 .toolbar{
@@ -7,4 +9,15 @@ canvas {
   border: 1px solid black;
   margin-left: 10px;
   width: 200px;
+}
+
+a img{
+  border: none;
+}
+
+a.building-btn{
+  display: block;
+  float: left;
+  width: 50px;
+  text-align: center;
 }

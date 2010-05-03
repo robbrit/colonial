@@ -1,11 +1,4 @@
 var Game = {
-  images: {
-    redHover: {
-      file: "util/red-hover.png",
-      image: new Image()
-    }
-  },
-
   loadTiles: function(url){
     $.getJSON(url, function(response){
       var tiles = response.tiles;
@@ -13,48 +6,13 @@ var Game = {
       for (var y = 0; y < response.height; y++){
         Game.tiles[y] = new Array(response.width);
         for (var x = 0; x < response.width; x++){
-          Game.tiles[y][x] = new Tile([x, y], Game.tileTypes[tiles[y][x].type]);
+          Game.tiles[y][x] = new Tile([x, y], TileTypes[tiles[y][x].type]);
         }
       }
       Game.tiler = new Diamond(Game.tiles, "#main-canvas");
       Game.tiler.render();
       $(".toolbar").height($("#main-canvas").height());
     });
-  },
-
-  build: function(what){
-    Game.building = Buildings[what];
-  },
-
-  onClick: function(ev){
-    var coords = Game.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
-
-    // TODO: some buildings are big
-    var tile = Game.tiles[coords[1]][coords[0]];
-    if (tile && tile.type.buildable){
-      Game.tiles[coords[1]][coords[0]].building = Game.building;
-    }
-  },
-
-  mouseMove: function(ev){
-    if (Game.building){
-      var coords = Game.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
-
-      if (Game.tiler.inBounds(coords)){
-        var tile = Game.tiles[coords[1]][coords[0]];
-        if (tile.building || !tile.type.buildable){
-          Game.tiler.setHover(coords, Game.images.redHover);
-        }else{
-          Game.tiler.setHover(coords, Game.building);
-        }
-      }
-    }
-  },
-
-  mouseOut: function(ev){
-    if (Game.building){
-      Game.tiler.setHover();
-    }
   },
 
   canvasCoords: function(xy){
@@ -65,39 +23,30 @@ var Game = {
     ];
   },
 
+  update: function(){
+    GameLogic.update();
+    Game.tiler.render();
+  },
+
+  findTile: function(callback){
+    for (var y = 0; y < Game.tiles.length; y++){
+      for (var x = 0; x < Game.tiles[y].length; x++){
+        if (callback(Game.tiles[y][x])){
+          return Game.tiles[y][x];
+        }
+      }
+    }
+    return false;
+  },
+
   tiles: false,
   tiler: false,
   building: false
 };
 
 $(function(){
-  for (var i in Game.tileTypes){
-    Game.tileTypes[i].image.src = "images/tiles/" + Game.tileTypes[i].file;
-  }
-  for (var i in Buildings){
-    Buildings[i].image.src = "images/buildings/" + Buildings[i].file;
-  }
-  for (var i in Game.images){
-    Game.images[i].image.src = "images/" + Game.images[i].file;
-  }
-
   Game.loadTiles("maps/bigmap.js");
+
+  // fire up the game engine
+  Game.intervalID = setInterval(Game.update, 33);
 });
-
-$("#main-canvas")
-  .click(Game.onClick)
-  .mousemove(Game.mouseMove)
-  .mouseout(Game.mouseOut);
-
-$(document)
-  .keypress(function(ev){
-    if (ev.keyCode == 38){ // up
-      Game.tiler.scroll(0, -Common.scrollSpeed);
-    }else if (ev.keyCode == 39){ // right
-      Game.tiler.scroll(Common.scrollSpeed, 0);
-    }else if (ev.keyCode == 40){ // down
-      Game.tiler.scroll(0, Common.scrollSpeed);
-    }else if (ev.keyCode == 37){ // left
-      Game.tiler.scroll(-Common.scrollSpeed, 0);
-    }
-  });

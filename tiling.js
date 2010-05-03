@@ -1,4 +1,5 @@
 function Tile(xy, type){
+  // TODO: Allow for randomized images
   this.xy = xy;
   this.image = type.image;
   this.type = type;
@@ -12,63 +13,62 @@ Tile.prototype.setImage = function(what){
 
 function Diamond(tiles, element){
   this.tiles = tiles;
-  this.loaded = false;
   this.element = $(element);
 
+  // this provides the basis for our isometric layout
   this.jhat = Math.floor(tiles[0][0].image.height / 2);
   this.ihat = tiles[0][0].image.width / 2;
 
+  // maximum size of the display port
+  this.maxWidth = 800;
+  this.maxHeight = 600;
+
+  // set the canvas size to contain the tiles
+  this.setCanvasSize(
+    this.jhat * (this.tiles[0].length + this.tiles.length + 1),
+    this.ihat * (this.tiles[0].length + this.tiles.length));
+
   this.context = this.element.get(0).getContext("2d");
 
+  // this is the scroll offset representing the top-left point of the visible region
   this.anchor = {left: 0, top: 0};
 
+  // isometric width/height in tiles
   this.width = tiles[0].length;
   this.height = tiles.length;
 
   this.base = (this.jhat + 1) * this.width;
 
-  this.canvasSize = {
+  // normal width/height in pixels
+  this.backgroundSize = {
     width: this.width * this.ihat * 2,
     height: this.base + this.height * (this.jhat + 1)
   };
-
-  this.maxWidth = 800;
-  this.maxHeight = 600;
-
+  
+  // an image that hovers over the canvas
   this.hover = {pos: false, image: false};
+
+  // a surface to contain the terrain information
+  this.renderTerrain();
+  this.renderBuildings();
 }
 
 Diamond.prototype.render = function(){
-  if (!this.loaded){
-    this.setCanvasSize(
-      this.jhat * (this.tiles[0].length + this.tiles.length + 1),
-      this.ihat * (this.tiles[0].length + this.tiles.length));
-    this.loaded = true;
-  }
+  this.context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 
-  this.context.fillStyle = "rgb(255, 255, 255)";
-  this.context.fillRect(0, 0, this.canvasSize.width, this.canvasSize.height);
-
-  var coords;
-
-  // pass 1 - draw terrain
-  for (var y = 0; y < this.tiles.length; y++){
-    for (var x = this.tiles[y].length - 1; x >= 0; x--){
-      coords = this.toScreenCoords([x, y]);
-      this.context.drawImage(this.tiles[y][x].image, coords[0], coords[1]);
-    }
-  }
+  //pass 1 - draw terrain
+  this.renderLayer(this.terrainSurface);
 
   //pass 2 - draw buildings
-  for (var y = 0; y < this.tiles.length; y++){
-    for (var x = this.tiles[y].length - 1; x >= 0; x--){
-      coords = this.toScreenCoords([x, y]);
-      if (this.tiles[y][x].building){
-        this.context.drawImage(this.tiles[y][x].building.image, coords[0], coords[1]);
-      }
-    }
-  }
+  this.renderLayer(this.buildingSurface);
 };
+
+Diamond.prototype.renderLayer = function(surface){
+  this.context.drawImage(surface,
+    this.anchor.left, this.anchor.top, this.canvasSize.width, this.canvasSize.height,
+    0, 0, this.canvasSize.width, this.canvasSize.height);
+
+}
 
 Diamond.prototype.renderTile = function(xy){
   var coords = this.toScreenCoords(xy);
@@ -79,20 +79,71 @@ Diamond.prototype.renderTile = function(xy){
   }
 };
 
+Diamond.prototype.renderTerrain = function(){
+  if (!this.terrainSurface){
+    this.terrainSurface = Common.createHiddenSurface(this.backgroundSize.width, this.backgroundSize.height);
+  }
+  var context = this.terrainSurface.getContext("2d");
+
+  context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+
+  var coords;
+
+  for (var y = 0; y < this.tiles.length; y++){
+    for (var x = this.tiles[y].length - 1; x >= 0; x--){
+      coords = this.toScreenCoords([x, y], false);
+      context.drawImage(this.tiles[y][x].image, coords[0], coords[1]);
+    }
+  }
+};
+
+Diamond.prototype.renderBuildings = function(){
+  if (!this.buildingSurface){
+    this.buildingSurface = Common.createHiddenSurface(this.backgroundSize.width, this.backgroundSize.height);
+  }
+  var context = this.buildingSurface.getContext("2d");
+
+  context.fillStyle = "rgba(255, 255, 255, 0)";
+  context.fillRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+
+  var coords;
+
+  for (var y = 0; y < this.tiles.length; y++){
+    for (var x = this.tiles[y].length - 1; x >= 0; x--){
+      coords = this.toScreenCoords([x, y], false);
+      if (this.tiles[y][x].building){
+        // TODO: some buildings are big
+        context.drawImage(this.tiles[y][x].building.image, coords[0], coords[1]);
+      }
+    }
+  }
+}
+
 Diamond.prototype.toWorldCoords = function(xy){
-  var y = xy[1] - (this.base - this.jhat - this.anchor.top);
+  // convert from screen coordinates on the canvas to a world tile
+  // first offset to where the (0,0) point is in world space (at the tip
+  // of the rightmost tile)
+  var y = xy[1] - this.base + this.jhat + this.anchor.top;
   var x = xy[0] + this.anchor.left;
 
+  // now convert x,y to the isometric basis
   return [
     Math.round(x / 2.0 / this.ihat - y / (2 * this.jhat + 2)),
     Math.round(x / 2.0 / this.ihat + y / (2 * this.jhat + 2)) - 1
   ];
 };
 
-Diamond.prototype.toScreenCoords = function(xy){
+Diamond.prototype.toScreenCoords = function(xy, include_anchor){
+  // convert from world coordinates back to screen coordinates
+  // if include_anchor is true or not specified, then add the anchor.
+  // Offscreen surfaces don't use the anchor.
+  if (include_anchor === undefined){
+    include_anchor = true;
+  }
+  // convert x,y to the standard basis
   return [
-    xy[1] * this.ihat + xy[0] * this.ihat - this.anchor.left,
-    this.base + xy[1] * (this.jhat + 1) - xy[0] * this.jhat - this.ihat / 2 - this.anchor.top - xy[0]
+    xy[1] * this.ihat + xy[0] * this.ihat - (include_anchor ? this.anchor.left : 0),
+    this.base + xy[1] * (this.jhat + 1) - xy[0] * (this.jhat + 1) - this.ihat / 2 - (include_anchor ? this.anchor.top : 0)
   ];
 }
 
@@ -108,8 +159,8 @@ Diamond.prototype.setCanvasSize = function(height, width){
 };
 
 Diamond.prototype.scroll = function(dx, dy){
-  this.anchor.left = Math.max(Math.min(this.anchor.left + dx, this.width  * this.ihat * 2 - this.canvasSize.width ), 0);
-  this.anchor.top  = Math.max(Math.min(this.anchor.top  + dy, this.height * (this.jhat + 1) * 2 - this.canvasSize.height), 0);
+  this.anchor.left = Math.max(Math.min(this.anchor.left + dx, this.backgroundSize.width  - this.canvasSize.width ), 0);
+  this.anchor.top  = Math.max(Math.min(this.anchor.top  + dy, this.backgroundSize.height - this.canvasSize.height), 0);
   this.render();
 };
 

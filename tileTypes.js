@@ -1,4 +1,4 @@
-Game.tileTypes = {
+var TileTypes = {
   water: {
     file: "water.png",
     image: new Image(),
