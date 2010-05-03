@@ -39,10 +39,16 @@ var Game = {
     return false;
   },
 
+  getSprites: function(){
+    return $.map(Game.objects, function(obj, i) { return obj.sprite.image; });
+  },
+
   tiles: false,
   tiler: false,
   building: false
 };
+
+Game.objects = new Array();
 
 $(function(){
   Game.loadTiles("maps/bigmap.js");

@@ -3,6 +3,16 @@ var Resources = {
     redHover: {
       file: "util/red-hover.png",
       image: new Image()
+    },
+
+    immigrant: {
+      file: "sprites/immigrant.png",
+      image: new Image()
+    }
+  },
+
+  sprites: {
+    immigrant: {
     }
   }
 }

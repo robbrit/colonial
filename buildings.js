@@ -8,6 +8,7 @@ var Buildings = {
   plot: {
     image: new Image(),
     file: "plot.png",
-    type: "plot"
+    type: "plot",
+    capacity: 1
   }
 };
