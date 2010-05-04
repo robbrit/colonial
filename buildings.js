@@ -1,14 +1,13 @@
 var Buildings = {
-  road: {
-    image: new Image(),
-    file: "road.png",
-    type: "road"
+  road: function(xy){
+    this.image = Resources.images.road;
+    this.type = "road";
   },
 
-  plot: {
-    image: new Image(),
-    file: "plot.png",
-    type: "plot",
-    capacity: 1
+  plot: function(xy){
+    this.image = Resources.images.plot;
+    this.type = "plot";
+    this.capacity = 1;
+    this.location = xy;
   }
 };

@@ -7,6 +7,7 @@ Game.Controls = {
         var tile = Game.tiles[coords[1]][coords[0]];
         if (tile && tile.type.buildable){
           tile.building = Game.building;
+          Game.building = new Game.building.constructor();
           Game.tiler.renderBuildings();
         }
       }
@@ -20,9 +21,9 @@ Game.Controls = {
       if (Game.tiler.inBounds(coords)){
         var tile = Game.tiles[coords[1]][coords[0]];
         if (tile.building || !tile.type.buildable){
-          Game.tiler.setHover(coords, Game.images.redHover);
+          Game.tiler.setHover(coords, Resources.images.redHover);
         }else{
-          Game.tiler.setHover(coords, Game.building);
+          Game.tiler.setHover(coords, Game.building.image);
         }
       }
     }
@@ -35,7 +36,7 @@ Game.Controls = {
   },
 
   selectBuilding: function(what){
-    Game.building = Buildings[what];
+    Game.building = new Buildings[what]();
   }
 }
 

@@ -24,6 +24,7 @@ var Game = {
   },
 
   update: function(){
+    $.each(Game.objects, function(i, obj) { obj.update(); });
     GameLogic.update();
     Game.tiler.render();
   },
@@ -40,7 +41,7 @@ var Game = {
   },
 
   getSprites: function(){
-    return $.map(Game.objects, function(obj, i) { return obj.sprite.image; });
+    return Game.objects;
   },
 
   tiles: false,

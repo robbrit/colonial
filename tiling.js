@@ -61,6 +61,19 @@ Diamond.prototype.render = function(){
 
   //pass 2 - draw buildings
   this.renderLayer(this.buildingSurface);
+
+  //pass 3 - render sprites
+  var sprites = Game.getSprites();
+
+  var sprite, coords;
+  for (var i = 0; i < sprites.length; i++){
+    sprite = sprites[i];
+    coords = this.toScreenCoords(sprite.getLocation());
+    this.context.drawImage(sprite.sprite.image, coords[0], coords[1]);
+  }
+
+  //pass 4 - draw overlay
+  this.colourHover();
 };
 
 Diamond.prototype.renderLayer = function(surface){
@@ -75,7 +88,7 @@ Diamond.prototype.renderTile = function(xy){
   this.context.drawImage(this.tiles[xy[1]][xy[0]].image, coords[0], coords[1]);
 
   if (this.tiles[xy[1]][xy[0]].building){
-    this.context.drawImage(this.tiles[xy[1]][xy[0]].building.image, coords[0], coords[1]);
+    this.context.drawImage(this.tiles[xy[1]][xy[0]].building.image.image, coords[0], coords[1]);
   }
 };
 
@@ -113,7 +126,7 @@ Diamond.prototype.renderBuildings = function(){
       coords = this.toScreenCoords([x, y], false);
       if (this.tiles[y][x].building){
         // TODO: some buildings are big
-        context.drawImage(this.tiles[y][x].building.image, coords[0], coords[1]);
+        context.drawImage(this.tiles[y][x].building.image.image, coords[0], coords[1]);
       }
     }
   }
@@ -142,8 +155,9 @@ Diamond.prototype.toScreenCoords = function(xy, include_anchor){
   }
   // convert x,y to the standard basis
   return [
-    xy[1] * this.ihat + xy[0] * this.ihat - (include_anchor ? this.anchor.left : 0),
-    this.base + xy[1] * (this.jhat + 1) - xy[0] * (this.jhat + 1) - this.ihat / 2 - (include_anchor ? this.anchor.top : 0)
+    Math.round(xy[1] * this.ihat + xy[0] * this.ihat - (include_anchor ? this.anchor.left : 0)),
+    Math.round(this.base + xy[1] * (this.jhat + 1)
+      - xy[0] * (this.jhat + 1) - this.ihat / 2 - (include_anchor ? this.anchor.top : 0))
   ];
 }
 

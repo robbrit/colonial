@@ -30,7 +30,7 @@ var AI = {
     while (toExpand.length > 0){
       current = toExpand.shift();
       if (current[0][0] == end[0] && current[0][1] == end[1]){
-        return current[1];
+        return Array.concat(current[1], [end]);
       }
 
       neighbours = expand(current[0]);

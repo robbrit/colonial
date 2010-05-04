@@ -1,6 +1,8 @@
 var GameLogic = {
   createImmigrant: function(target){
-    GameLogic.population.push(new Immigrant([0, 0], target));
+    var immigrant = new Immigrant([0, 0], target);
+    GameLogic.population++;
+    Game.objects.push(immigrant);
   },
   
   update: function(dt){
@@ -9,30 +11,13 @@ var GameLogic = {
       return tile.building && tile.building.capacity !== undefined && tile.building.capacity > 0;
     });
 
-    if (available !== false){
-      available.capacity--;
+    if (available !== false && Math.random() < 0.05){
+      // On a 5% probability, create an immigrant
+      available.building.capacity--;
       GameLogic.createImmigrant(available);
     }
   }
 };
 
-GameLogic.population = new Array();
+GameLogic.population = 0;
 
-function Immigrant(start, target){
-  this.location = start;
-
-  this.path = AI.AStar(this, start, target.xy);
-  this.path.shift(); // AStar returns the start already in there
-  this.target = this.path.shift();
-
-  this.sprite = Resources.sprites.immigrant;
-}
-
-Immigrant.prototype.update = function(){
-  /*
-  if at target
-    get next target
-  else
-    move toward target
-  */
-}
