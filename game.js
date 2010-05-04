@@ -11,6 +11,7 @@ var Game = {
       }
       Game.display = new Display(Game.tiles);
       Game.display.render();
+      Game.state = "playing";
     });
   },
 
@@ -23,14 +24,16 @@ var Game = {
   },
 
   update: function(){
-    // delete old messages
-    var tooOld = Common.time() - 5000;
-    
-    Game.messages = $.grep(Game.messages, function(obj) { return obj.timestamp > tooOld; });
+    if (Game.state == "playing"){
+      // delete old messages
+      var tooOld = Common.time() - 5000;
+      
+      Game.messages = $.grep(Game.messages, function(obj) { return obj.timestamp > tooOld; });
 
-    $.each(Game.objects, function(i, obj) { obj.update(); });
-    GameLogic.update();
-    Game.display.render();
+      $.each(Game.objects, function(i, obj) { obj.update(); });
+      GameLogic.update();
+      Game.display.render();
+    }
   },
 
   findTile: function(callback){
@@ -68,7 +71,8 @@ var Game = {
   },
 
   tiles: false,
-  building: false
+  building: false,
+  state: "initializing"
 };
 
 Game.objects = new Array();

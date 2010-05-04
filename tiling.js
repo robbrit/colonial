@@ -65,11 +65,15 @@ Diamond.prototype.render = function(){
   //pass 3 - render sprites
   var sprites = Game.getSprites();
 
-  var sprite, coords;
+  var sprite, coords, offsetX, offsetY;
   for (var i = 0; i < sprites.length; i++){
     sprite = sprites[i];
     coords = this.toScreenCoords(sprite.getLocation());
-    this.context.drawImage(sprite.sprite.image, coords[0], coords[1]);
+
+    // adjust so that the bottom of the sprite appears on the tile
+    offsetX = this.ihat - sprite.sprite.image.width / 2;
+    offsetY = this.jhat - sprite.sprite.image.height;
+    this.context.drawImage(sprite.sprite.image, coords[0] + offsetX, coords[1] + offsetY);
   }
 
   //pass 4 - draw overlay

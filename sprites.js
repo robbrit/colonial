@@ -9,7 +9,6 @@ function Sprite(sprite, xy, offsetxy){
 }
 
 Sprite.prototype.getLocation = function(){
-  // TODO: adjust sprites offset so that the bottom appears on the tile they are on
   return [
     this.location[0] + this.offset.elements[0],
     this.location[1] + this.offset.elements[1]
@@ -23,7 +22,7 @@ function Immigrant(start, target){
   this.path = AI.AStar(this, start, target.xy);
 
   if (!this.path){
-    Game.addMessage("Some housing plots are inaccessible.");
+    Game.addMessage(t("inaccessible_housing"));
   }else{
     this.path.shift(); // AStar returns the start already in there
     this.target = $V(this.path.shift());

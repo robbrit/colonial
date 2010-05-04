@@ -1,11 +1,12 @@
 <html>
 <head>
-  <title></title>
+  <title>Colonial</title>
   <link rel = "stylesheet" type = "text/css" href = "style.css" />
 </head>
 <body>
 <canvas id = "main-canvas"></canvas>
 <div class = "toolbar">
+  <!-- TODO: I18N on these -->
   <a href = "#" onclick = "Game.Controls.selectBuilding('road'); return false" class = "building-btn">
     <img src = "images/buildings/road.png" alt = "Road" title = "Road" />
   </a>
@@ -13,6 +14,7 @@
     <img src = "images/buildings/plot.png" alt = "Plot" title = "Housing Plot" />
   </a>
 </div>
+<!-- millions of JS includes -->
 <script type = "text/javascript" src = "jquery-1.4.2.min.js"></script>
 <script type = "text/javascript" src = "json2.js"></script>
 <script type = "text/javascript" src = "common.js"></script>
@@ -27,5 +29,6 @@
 <script type = "text/javascript" src = "sprites.js"></script>
 <script type = "text/javascript" src = "sylvester.js"></script>
 <script type = "text/javascript" src = "display.js"></script>
+<script type = "text/javascript" src = "text.js"></script>
 </body>
 </html>
