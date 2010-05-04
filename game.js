@@ -9,9 +9,8 @@ var Game = {
           Game.tiles[y][x] = new Tile([x, y], TileTypes[tiles[y][x].type]);
         }
       }
-      Game.tiler = new Diamond(Game.tiles, "#main-canvas");
-      Game.tiler.render();
-      $(".toolbar").height($("#main-canvas").height());
+      Game.display = new Display(Game.tiles);
+      Game.display.render();
     });
   },
 
@@ -24,9 +23,14 @@ var Game = {
   },
 
   update: function(){
+    // delete old messages
+    var tooOld = Common.time() - 5000;
+    
+    Game.messages = $.grep(Game.messages, function(obj) { return obj.timestamp > tooOld; });
+
     $.each(Game.objects, function(i, obj) { obj.update(); });
     GameLogic.update();
-    Game.tiler.render();
+    Game.display.render();
   },
 
   findTile: function(callback){
@@ -44,12 +48,31 @@ var Game = {
     return Game.objects;
   },
 
+  getMessages: function(){
+    return $.map(Game.messages, function(obj) { return obj.message; });
+  },
+
+  addMessage: function(msg){
+    // message queue can only be 10 messages long
+    if (Game.messages.length == 10){
+      Game.messages.shift();
+    }
+    Game.messages.push({
+      message: msg,
+      timestamp: Common.time()
+    });
+  },
+
+  inBounds: function(xy){
+    return this.display.tiler.inBounds(xy);
+  },
+
   tiles: false,
-  tiler: false,
   building: false
 };
 
 Game.objects = new Array();
+Game.messages = new Array();
 
 $(function(){
   Game.loadTiles("maps/bigmap.js");

@@ -21,30 +21,37 @@ function Immigrant(start, target){
 
   this.speed = 0.15;
   this.path = AI.AStar(this, start, target.xy);
-  this.path.shift(); // AStar returns the start already in there
-  this.target = $V(this.path.shift());
 
-  this.vectorize();
+  if (!this.path){
+    Game.addMessage("Some housing plots are inaccessible.");
+  }else{
+    this.path.shift(); // AStar returns the start already in there
+    this.target = $V(this.path.shift());
+
+    this.vectorize();
+  }
 }
 Immigrant.prototype = Sprite.prototype;
 
 Immigrant.prototype.update = function(){
-  var dist = this.offset.add($V(this.location)).subtract(this.target);
-  if (dist.dot(dist) <= this.speed * this.speed){
-    // we're here! are we at our final target?
-    if (this.path.length == 0){
-      // TODO: enter house, do work
+  if (this.path){
+    var dist = this.offset.add($V(this.location)).subtract(this.target);
+    if (dist.dot(dist) <= this.speed * this.speed){
+      // we're here! are we at our final target?
+      if (this.path.length == 0){
+        // TODO: enter house, do work
+      }else{
+        this.location = this.target.elements;
+        this.target = $V(this.path.shift());
+        this.offset.elements[0] = 0;
+        this.offset.elements[1] = 0;
+        this.vectorize();
+      }
     }else{
-      this.location = this.target.elements;
-      this.target = $V(this.path.shift());
-      this.offset.elements[0] = 0;
-      this.offset.elements[1] = 0;
-      this.vectorize();
+      // move
+      this.offset.elements[0] += this.vel.elements[0];
+      this.offset.elements[1] += this.vel.elements[1];
     }
-  }else{
-    // move
-    this.offset.elements[0] += this.vel.elements[0];
-    this.offset.elements[1] += this.vel.elements[1];
   }
 };
 

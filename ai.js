@@ -6,7 +6,7 @@ var AI = {
       for (var i = -1; i <= 1; i++){
         for (var j = -1; j <= 1; j++){
           var next = [node[0] + i, node[1] + j];
-          if ((i != 0 || j != 0) && Game.tiler.inBounds(next)){
+          if ((i != 0 || j != 0) && Game.inBounds(next)){
             res.push(next);
           }
         }
@@ -54,7 +54,7 @@ var AI = {
 
         if (!seenIt){
           var type = Game.tiles[neighbours[i][1]][neighbours[i][0]].type;
-          if (($.isFunction(type.passable) && type.passable(who)) || type.passable){
+          if (($.isFunction(type.passable) && type.passable(who)) || type.passable === true){
             toExpand.push([neighbours[i], Array.concat(current[1], [current[0]])]);
           }
         }

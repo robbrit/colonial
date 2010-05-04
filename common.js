@@ -8,5 +8,7 @@ var Common = {
     return canvas;
   },
 
+  time: function() { return new Date().getTime(); },
+
   scrollSpeed: 20
 };

@@ -2,13 +2,13 @@ Game.Controls = {
   onClick: function(ev){
     if (Game.building){
       // TODO: allow dragging for road construction
-      var coords = Game.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
-      if (Game.tiler.inBounds(coords)){
+      var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
+      if (Game.inBounds(coords)){
         var tile = Game.tiles[coords[1]][coords[0]];
         if (tile && tile.type.buildable){
           tile.building = Game.building;
           Game.building = new Game.building.constructor();
-          Game.tiler.renderBuildings();
+          Game.display.tiler.renderBuildings();
         }
       }
     }
@@ -16,14 +16,14 @@ Game.Controls = {
 
   mouseMove: function(ev){
     if (Game.building){
-      var coords = Game.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
+      var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
 
-      if (Game.tiler.inBounds(coords)){
+      if (Game.inBounds(coords)){
         var tile = Game.tiles[coords[1]][coords[0]];
         if (tile.building || !tile.type.buildable){
-          Game.tiler.setHover(coords, Resources.images.redHover);
+          Game.display.tiler.setHover(coords, Resources.images.redHover);
         }else{
-          Game.tiler.setHover(coords, Game.building.image);
+          Game.display.tiler.setHover(coords, Game.building.image);
         }
       }
     }
@@ -31,7 +31,7 @@ Game.Controls = {
 
   mouseOut: function(ev){
     if (Game.building){
-      Game.tiler.setHover();
+      Game.display.tiler.setHover();
     }
   },
 
@@ -43,13 +43,13 @@ Game.Controls = {
 $(document)
   .keypress(function(ev){
     if (ev.keyCode == 38){ // up
-      Game.tiler.scroll(0, -Common.scrollSpeed);
+      Game.display.scroll(0, -Common.scrollSpeed);
     }else if (ev.keyCode == 39){ // right
-      Game.tiler.scroll(Common.scrollSpeed, 0);
+      Game.display.scroll(Common.scrollSpeed, 0);
     }else if (ev.keyCode == 40){ // down
-      Game.tiler.scroll(0, Common.scrollSpeed);
+      Game.display.scroll(0, Common.scrollSpeed);
     }else if (ev.keyCode == 37){ // left
-      Game.tiler.scroll(-Common.scrollSpeed, 0);
+      Game.display.scroll(-Common.scrollSpeed, 0);
     }
   });
 
