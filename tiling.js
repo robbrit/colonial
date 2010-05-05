@@ -68,12 +68,14 @@ Diamond.prototype.render = function(){
   var sprite, coords, offsetX, offsetY;
   for (var i = 0; i < sprites.length; i++){
     sprite = sprites[i];
-    coords = this.toScreenCoords(sprite.getLocation());
+    if (sprite.shouldDisplay()){
+      coords = this.toScreenCoords(sprite.getLocation());
 
-    // adjust so that the bottom of the sprite appears on the tile
-    offsetX = this.ihat - sprite.sprite.image.width / 2;
-    offsetY = this.jhat - sprite.sprite.image.height;
-    this.context.drawImage(sprite.sprite.image, coords[0] + offsetX, coords[1] + offsetY);
+      // adjust so that the bottom of the sprite appears on the tile
+      offsetX = this.ihat - sprite.sprite.image.width / 2;
+      offsetY = this.jhat - sprite.sprite.image.height;
+      this.context.drawImage(sprite.sprite.image, coords[0] + offsetX, coords[1] + offsetY);
+    }
   }
 
   //pass 4 - draw overlay
@@ -104,12 +106,44 @@ Diamond.prototype.renderTerrain = function(){
 
   context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 
-  var coords;
+  var coords, type;
 
   for (var y = 0; y < this.tiles.length; y++){
     for (var x = this.tiles[y].length - 1; x >= 0; x--){
       coords = this.toScreenCoords([x, y], false);
       context.drawImage(this.tiles[y][x].image, coords[0], coords[1]);
+      currentType = this.tiles[y][x].type.type;
+
+      // draw corners
+      if (y > 0){
+        if (x > 0){
+          //check top left
+          if ((type = this.tiles[y - 1][x].type) == this.tiles[y][x - 1].type && type.type != currentType){
+            context.drawImage(type.image_tl, coords[0], coords[1]);
+          }
+        }
+        if(x < this.width - 1){
+          //check top right
+          if ((type = this.tiles[y - 1][x].type) == this.tiles[y][x + 1].type && type.type != currentType){
+            context.drawImage(type.image_tr, coords[0], coords[1]);
+          }
+        }
+      }
+      if (y < this.height - 1){
+        // TODO: See if image flipping works later on
+        if (x > 0){
+          //check bottom left
+          if ((type = this.tiles[y + 1][x].type) == this.tiles[y][x - 1].type && type.type != currentType){
+            context.drawImage(type.image_bl, coords[0], coords[1]);
+          }
+        }
+        if(x < this.width - 1){
+          //check bottom right
+          if ((type = this.tiles[y + 1][x].type) == this.tiles[y][x + 1].type && type.type != currentType){
+            context.drawImage(type.image_br, coords[0], coords[1]);
+          }
+        }
+      }
     }
   }
 };

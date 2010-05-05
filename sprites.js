@@ -6,6 +6,8 @@ function Sprite(sprite, xy, offsetxy){
   this.location = xy;
   this.offset = offsetxy;
   this.sprite = sprite;
+
+  this.state = "showing";
 }
 
 Sprite.prototype.getLocation = function(){
@@ -15,10 +17,15 @@ Sprite.prototype.getLocation = function(){
   ];
 }
 
+Sprite.prototype.shouldDisplay = function(){
+  return this.state != "hidden";
+}
+
 function Immigrant(start, target){
   Sprite.call(this, Resources.sprites.immigrant, start);
 
   this.speed = 0.15;
+  this.targetTile = target;
   this.path = AI.AStar(this, start, target.xy);
 
   if (!this.path){
@@ -38,7 +45,8 @@ Immigrant.prototype.update = function(){
     if (dist.dot(dist) <= this.speed * this.speed){
       // we're here! are we at our final target?
       if (this.path.length == 0){
-        // TODO: enter house, do work
+        this.targetTile.building.addPerson(this);
+        // TODO: time to start looking for a job
       }else{
         this.location = this.target.elements;
         this.target = $V(this.path.shift());
