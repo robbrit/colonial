@@ -1,5 +1,10 @@
 var Resources = {
   images: {
+    hovel: {
+      file: "buildings/hovel.png",
+      image: new Image()
+    },
+
     immigrant: {
       file: "sprites/immigrant.png",
       image: new Image()

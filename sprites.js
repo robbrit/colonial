@@ -24,7 +24,7 @@ Sprite.prototype.shouldDisplay = function(){
 function Immigrant(start, target){
   Sprite.call(this, Resources.sprites.immigrant, start);
 
-  this.speed = 0.15;
+  this.speed = 0.10;
   this.targetTile = target;
   this.path = AI.AStar(this, start, target.xy);
 
@@ -45,8 +45,8 @@ Immigrant.prototype.update = function(){
     if (dist.dot(dist) <= this.speed * this.speed){
       // we're here! are we at our final target?
       if (this.path.length == 0){
-        this.targetTile.building.addPerson(this);
-        // TODO: time to start looking for a job
+        this.targetTile.building.arrived(this);
+        this.update = Immigrant.citizenUpdate;
       }else{
         this.location = this.target.elements;
         this.target = $V(this.path.shift());
@@ -66,3 +66,7 @@ Immigrant.prototype.vectorize = function(){
   this.vlocation = $V(this.location);
   this.vel = this.target.subtract(this.vlocation).toUnitVector().multiply(this.speed);
 }
+
+Immigrant.citizenUpdate = function(){
+  // TODO: time to start looking for a job
+};

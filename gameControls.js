@@ -7,7 +7,8 @@ Game.Controls = {
         var tile = Game.tiles[coords[1]][coords[0]];
         if (tile && tile.type.buildable){
           tile.building = Game.building;
-          Game.building = new Game.building.constructor();
+          tile.building.placed(coords);
+          Game.building = new Buildings[Game.buildingType]();
           Game.display.tiler.renderBuildings();
         }
       }
@@ -37,6 +38,7 @@ Game.Controls = {
 
   selectBuilding: function(what){
     Game.building = new Buildings[what]();
+    Game.buildingType = what;
   }
 }
 
