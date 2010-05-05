@@ -60,6 +60,7 @@ var AI = {
         }
       }
 
+      // TODO: Change this to a binary heap to speed this part up a bit
       toExpand.sort(function(a, b){
         return (fFunc(a[0]) + gFunc(a[0])) - (fFunc(b[0]) + gFunc(b[0]));
       });

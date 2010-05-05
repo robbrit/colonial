@@ -159,6 +159,7 @@ Diamond.prototype.renderBuildings = function(){
 
   var coords;
 
+  // TODO: buildings should be in a list somewhere, iterate over that instead of over every tile
   for (var y = 0; y < this.tiles.length; y++){
     for (var x = this.tiles[y].length - 1; x >= 0; x--){
       coords = this.toScreenCoords([x, y], false);
