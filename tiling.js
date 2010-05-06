@@ -159,15 +159,10 @@ Diamond.prototype.renderBuildings = function(){
 
   var coords;
 
-  // TODO: buildings should be in a list somewhere, iterate over that instead of over every tile
-  for (var y = 0; y < this.tiles.length; y++){
-    for (var x = this.tiles[y].length - 1; x >= 0; x--){
-      coords = this.toScreenCoords([x, y], false);
-      if (this.tiles[y][x].building){
-        // TODO: some buildings are big
-        context.drawImage(this.tiles[y][x].building.image.image, coords[0], coords[1]);
-      }
-    }
+  var buildings = Game.getBuildings();
+  for (var i = 0; i < buildings.length; i++){
+    coords = this.toScreenCoords(buildings[i].location, false);
+    context.drawImage(buildings[i].image.image, coords[0], coords[1] - (this.jhat * (buildings[i].height - 1)));
   }
 }
 
@@ -237,6 +232,7 @@ Diamond.prototype.colourHover = function(clear){
       this.renderTile(this.hover.pos);
     }else{
       var coords = this.toScreenCoords(this.hover.pos);
+      // TODO: big images need to be shifted up
       this.context.drawImage(this.hover.image, coords[0], coords[1]);
     }
   }

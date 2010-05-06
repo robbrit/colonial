@@ -55,6 +55,10 @@ var Game = {
     return $.map(Game.messages, function(obj) { return obj.message; });
   },
 
+  getBuildings: function(){
+    return Game.buildings;
+  },
+
   addMessage: function(msg){
     // message queue can only be 10 messages long
     if (Game.messages.length == 10){
@@ -76,6 +80,7 @@ var Game = {
 };
 
 Game.objects = new Array();
+Game.buildings = new Array();
 Game.messages = new Array();
 
 $(function(){

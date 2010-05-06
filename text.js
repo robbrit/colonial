@@ -7,7 +7,8 @@ var Text = {
 
 Text.en = {
   inaccessible_housing: "Some housing plots are inaccessible.",
-  plot_too_far: "Some housing plots are too far from a road."
+  plot_too_far: "Some housing plots are too far from a road.",
+  must_be_near_road: "This building must be adjacent to a road."
 };
 
 function t(label){

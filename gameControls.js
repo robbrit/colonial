@@ -8,6 +8,7 @@ Game.Controls = {
         if (tile && tile.type.buildable){
           tile.building = Game.building;
           tile.building.placed(coords);
+          Game.buildings.push(Game.building);
           Game.building = new Buildings[Game.buildingType]();
           Game.display.tiler.renderBuildings();
         }
@@ -19,13 +20,26 @@ Game.Controls = {
     if (Game.building){
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
 
-      if (Game.inBounds(coords)){
-        var tile = Game.tiles[coords[1]][coords[0]];
-        if (tile.building || !tile.type.buildable){
-          Game.display.tiler.setHover(coords, Resources.images.redHover);
-        }else{
-          Game.display.tiler.setHover(coords, Game.building.image);
+      var canPlace = true;
+      for (var y = 0; y < Game.building.width; y++){
+        for (var x = 0; x < Game.building.height; x++){
+          if (Game.inBounds([coords[0] + x, coords[1] + y])){
+            var tile = Game.tiles[coords[1] + y][coords[0] + x];
+            if (tile.building || !tile.type.buildable){
+              canPlace = false;
+              break;
+            }
+          }
         }
+        if (!canPlace){
+          break;
+        }
+      }
+      if (canPlace){
+        Game.display.tiler.setHover(coords, Game.building.image);
+      }else{
+        Game.display.tiler.setHover(coords, Resources.images["redHover_" + Game.building.width +
+          "_" + Game.building.height]);
       }
     }
   },

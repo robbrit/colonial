@@ -2,27 +2,30 @@ var Resources = {
   images: {
     hovel: {
       file: "buildings/hovel.png",
-      image: new Image()
     },
 
     immigrant: {
       file: "sprites/immigrant.png",
-      image: new Image()
     },
 
     plot: {
       file: "buildings/plot.png",
-      image: new Image()
     },
 
-    redHover: {
-      file: "util/red-hover.png",
-      image: new Image()
+    redHover_1_1: {
+      file: "util/red-hover-1-1.png",
+    },
+
+    redHover_2_2: {
+      file: "util/red-hover-2-2.png",
     },
 
     road: {
       file: "buildings/road.png",
-      image: new Image()
+    },
+
+    water_hole: {
+      file: "buildings/water-hole.png",
     }
   }
 };
@@ -36,6 +39,7 @@ $(function(){
     TileTypes[i].image.src = "images/tiles/" + TileTypes[i].file;
   }
   for (var i in Resources.images){
+    Resources.images[i].image = new Image();
     Resources.images[i].image.src = "images/" + Resources.images[i].file;
   }
 });
