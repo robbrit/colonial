@@ -23,7 +23,7 @@ var GameLogic = {
         return tile.building && tile.building.getCapacity !== undefined && tile.building.getCapacity() > 0;
       });
 
-      if (available !== false && Math.random() < 0.15){
+      if (available !== false && Math.random() < 0.05){
         // On a 5% probability, create an immigrant
         GameLogic.createImmigrant(available);
       }

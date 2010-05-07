@@ -4,12 +4,17 @@ function Tile(xy, type){
   this.image = type.image;
   this.type = type;
   this.building = false;
+  this.road = false;
 }
 
 Tile.prototype.setImage = function(what){
   this.image = what.image;
   this.type = what.type;
 }
+
+Tile.prototype.canBuild = function(){
+  return !this.road && !this.building && this.type.buildable;
+};
 
 function Diamond(tiles, element){
   this.tiles = tiles;
@@ -46,23 +51,22 @@ function Diamond(tiles, element){
   };
   
   // an image that hovers over the canvas
-  this.hover = {pos: false, image: false};
+  this.hover = {pos: false, image: false, offsetY: 0};
 
   // a surface to contain the terrain information
   this.renderTerrain();
+  this.renderRoads();
   this.renderBuildings();
 }
 
 Diamond.prototype.render = function(){
   this.context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 
-  //pass 1 - draw terrain
+  //pass 1 - draw terrain, roads and buildings
   this.renderLayer(this.terrainSurface);
-
-  //pass 2 - draw buildings
+  this.renderLayer(this.roadSurface);
   this.renderLayer(this.buildingSurface);
 
-  //pass 3 - render sprites
   var sprites = Game.getSprites();
 
   var sprite, coords, offsetX, offsetY;
@@ -78,7 +82,7 @@ Diamond.prototype.render = function(){
     }
   }
 
-  //pass 4 - draw overlay
+  // draw overlay
   this.colourHover();
 };
 
@@ -142,6 +146,39 @@ Diamond.prototype.renderTerrain = function(){
           if ((type = this.tiles[y + 1][x].type) == this.tiles[y][x + 1].type && type.type != currentType){
             context.drawImage(type.image_br, coords[0], coords[1]);
           }
+        }
+      }
+    }
+  }
+};
+
+Diamond.prototype.renderRoads = function(){
+  if (!this.roadSurface){
+    this.roadSurface = Common.createHiddenSurface(this.backgroundSize.width, this.backgroundSize.height);
+  }
+  var context = this.roadSurface.getContext("2d");
+
+  context.fillStyle = "rgba(255, 255, 255, 0)";
+  context.fillRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+
+  var coords;
+  for (var y = 0; y < this.tiles.length; y++){
+    for (var x = 0; x < this.tiles[y].length; x++){
+      if (this.tiles[y][x].road){
+        coords = this.toScreenCoords([x, y], false);
+        context.drawImage(Resources.images.road.image, coords[0], coords[1]);
+
+        if (x > 0 && this.tiles[y][x - 1].road){
+          context.drawImage(Resources.images.road_bl.image, coords[0], coords[1]);
+        }
+        if (y > 0 && this.tiles[y - 1][x].road){
+          context.drawImage(Resources.images.road_tl.image, coords[0], coords[1]);
+        }
+        if (x < this.tiles[y].length - 1 && this.tiles[y][x + 1].road){
+          context.drawImage(Resources.images.road_tr.image, coords[0], coords[1]);
+        }
+        if (y < this.tiles.length - 1 && this.tiles[y + 1][x].road){
+          context.drawImage(Resources.images.road_br.image, coords[0], coords[1]);
         }
       }
     }
@@ -212,15 +249,22 @@ Diamond.prototype.scroll = function(dx, dy){
   this.render();
 };
 
-Diamond.prototype.setHover = function(xy, image){
+Diamond.prototype.setHover = function(xy, object){
   if (this.hover.pos !== false){
     this.colourHover(true);
   }
   if (xy !== false && xy !== undefined){
     this.hover.pos = xy;
-    this.hover.image = image.image;
+
+    if (typeof(object) == "string"){
+      this.hover.image = Resources.images[object].image;
+    }else{
+      this.hover.image = object.image.image;
+      this.hover.offsetY = -this.jhat * (object.height - 1);
+    }
     this.colourHover();
   }else{
+    this.hover.offsetY = 0;
     this.hover.pos = false;
     this.hover.image = false;
   }
@@ -233,7 +277,7 @@ Diamond.prototype.colourHover = function(clear){
     }else{
       var coords = this.toScreenCoords(this.hover.pos);
       // TODO: big images need to be shifted up
-      this.context.drawImage(this.hover.image, coords[0], coords[1]);
+      this.context.drawImage(this.hover.image, coords[0], coords[1] + this.hover.offsetY);
     }
   }
 };

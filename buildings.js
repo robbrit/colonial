@@ -93,7 +93,7 @@ Buildings.basic.prototype.findRoad = function(radius, width, height){
   }
   for (var y = Math.max(0, this.location[1] - radius); y <= Math.min(Game.tiles.length - 1, this.location[1] + height - 1 + radius); y++){
     for (var x = Math.max(0, this.location[0] - radius); x <= Math.min(Game.tiles[y].length - 1, this.location[0] + width - 1 + radius); x++){
-      if (Game.tiles[y][x].building && Game.tiles[y][x].building.type == "road"){
+      if (Game.tiles[y][x].road){
         return true;
       }
     }

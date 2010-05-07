@@ -5,12 +5,17 @@ Game.Controls = {
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
       if (Game.inBounds(coords)){
         var tile = Game.tiles[coords[1]][coords[0]];
-        if (tile && tile.type.buildable){
-          tile.building = Game.building;
-          tile.building.placed(coords);
-          Game.buildings.push(Game.building);
-          Game.building = new Buildings[Game.buildingType]();
-          Game.display.tiler.renderBuildings();
+        if (tile.canBuild()){
+          if (Game.building == "road"){
+            tile.road = true;
+            Game.display.tiler.renderRoads();
+          }else{
+            tile.building = Game.building;
+            tile.building.placed(coords);
+            Game.buildings.push(Game.building);
+            Game.building = new Buildings[Game.buildingType]();
+            Game.display.tiler.renderBuildings();
+          }
         }
       }
     }
@@ -20,12 +25,15 @@ Game.Controls = {
     if (Game.building){
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
 
+      var width = (Game.building == "road" ? 1 : Game.building.width);
+      var height = (Game.building == "road" ? 1 : Game.building.height);
+
       var canPlace = true;
-      for (var y = 0; y < Game.building.width; y++){
-        for (var x = 0; x < Game.building.height; x++){
+      for (var y = 0; y < width; y++){
+        for (var x = 0; x < height; x++){
           if (Game.inBounds([coords[0] + x, coords[1] + y])){
             var tile = Game.tiles[coords[1] + y][coords[0] + x];
-            if (tile.building || !tile.type.buildable){
+            if (!tile.canBuild()){
               canPlace = false;
               break;
             }
@@ -36,10 +44,9 @@ Game.Controls = {
         }
       }
       if (canPlace){
-        Game.display.tiler.setHover(coords, Game.building.image);
+        Game.display.tiler.setHover(coords, Game.building);
       }else{
-        Game.display.tiler.setHover(coords, Resources.images["redHover_" + Game.building.width +
-          "_" + Game.building.height]);
+        Game.display.tiler.setHover(coords, "redHover_" + width + "_" + height);
       }
     }
   },
@@ -70,8 +77,12 @@ Game.Controls = {
   },
 
   selectBuilding: function(what){
-    Game.building = new Buildings[what]();
-    Game.buildingType = what;
+    if (what == "road"){
+      Game.building = Game.buildingType = "road";
+    }else{
+      Game.building = new Buildings[what]();
+      Game.buildingType = what;
+    }
   },
 
   keys: {}

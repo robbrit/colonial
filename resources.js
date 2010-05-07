@@ -23,6 +23,18 @@ var Resources = {
     road: {
       file: "buildings/road.png",
     },
+    road_tr: {
+      file: "buildings/road-tr.png",
+    },
+    road_tl: {
+      file: "buildings/road-tl.png",
+    },
+    road_bl: {
+      file: "buildings/road-bl.png",
+    },
+    road_br: {
+      file: "buildings/road-br.png",
+    },
 
     water_hole: {
       file: "buildings/water-hole.png",
