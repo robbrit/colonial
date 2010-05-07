@@ -1,28 +1,57 @@
 Game.Controls = {
   onClick: function(ev){
-    if (Game.building){
+    if (Game.building && Game.building != "road"){
+      // TODO: add money
       // TODO: allow dragging for road construction
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
       if (Game.inBounds(coords)){
         var tile = Game.tiles[coords[1]][coords[0]];
         if (tile.canBuild()){
-          if (Game.building == "road"){
+          /*if (Game.building == "road"){
             tile.road = true;
             Game.display.tiler.renderRoads();
-          }else{
+          }else{*/
             tile.building = Game.building;
             tile.building.placed(coords);
             Game.buildings.push(Game.building);
             Game.building = new Buildings[Game.buildingType]();
             Game.display.tiler.renderBuildings();
-          }
+          //}
         }
       }
     }
   },
 
+  mouseDown: function(ev){
+    Game.Controls.isMouseDown = true;
+  },
+  mouseUp: function(ev){
+    Game.Controls.isMouseDown = false;
+
+    if (Game.building == "road"){
+      Game.Controls.placeRoad(ev);
+    }
+  },
+
   mouseMove: function(ev){
-    if (Game.building){
+    if (Game.building == "road"){
+      // TODO: moving the mouse shouldn't actually place the road, it should just draw it
+      //       unclicking the mouse will place the road
+      if (Game.Controls.isMouseDown){
+        Game.Controls.placeRoad(ev);
+      }else{
+        var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
+
+        if (Game.inBounds(coords)){
+          var tile = Game.tiles[coords[1]][coords[0]];
+          if (tile.canBuild){
+            Game.display.tiler.setHover(coords, Game.building);
+          }else{
+            Game.display.tiler.setHover(coords, "redHover_1_1");
+          }
+        }
+      }
+    }else if (Game.building){
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
 
       var width = (Game.building == "road" ? 1 : Game.building.width);
@@ -85,7 +114,19 @@ Game.Controls = {
     }
   },
 
-  keys: {}
+  placeRoad: function(ev){
+    var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
+    if (Game.inBounds(coords)){
+      var tile = Game.tiles[coords[1]][coords[0]];
+      if (tile.canBuild()){
+        tile.road = true;
+        Game.display.tiler.renderRoads();
+      }
+    }
+  },
+
+  keys: {},
+  isMouseDown: false
 }
 
 $(document)
@@ -94,7 +135,9 @@ $(document)
 
 $(function(){
   $("#main-canvas")
-    .click(Game.Controls.onClick)
+    .mousedown(Game.Controls.mouseDown)
+    .mouseup(Game.Controls.mouseUp)
     .mousemove(Game.Controls.mouseMove)
-    .mouseout(Game.Controls.mouseOut);
+    .mouseout(Game.Controls.mouseOut)
+    .click(Game.Controls.onClick);
 });
