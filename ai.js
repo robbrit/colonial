@@ -30,7 +30,8 @@ var AI = {
     while (toExpand.length > 0){
       current = toExpand.shift();
       if (current[0][0] == end[0] && current[0][1] == end[1]){
-        return Array.concat(current[1], [end]);
+        current[1].push(end);
+        return current[1];
       }
 
       neighbours = expand(current[0]);
@@ -55,7 +56,7 @@ var AI = {
         if (!seenIt){
           var type = Game.tiles[neighbours[i][1]][neighbours[i][0]].type;
           if (($.isFunction(type.passable) && type.passable(who)) || type.passable === true){
-            toExpand.push([neighbours[i], Array.concat(current[1], [current[0]])]);
+            toExpand.push([neighbours[i], current[1].concat([current[0]])]);
           }
         }
       }

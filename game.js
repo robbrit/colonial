@@ -24,6 +24,7 @@ var Game = {
   },
 
   update: function(){
+    Game.Controls.update();
     if (Game.state == "playing"){
       // delete old messages
       var tooOld = Common.time() - 5000;
@@ -84,8 +85,17 @@ Game.buildings = new Array();
 Game.messages = new Array();
 
 $(function(){
-  Game.loadTiles("maps/bigmap.js");
+  // show loading
+  var context = $("#main-canvas").get(0).getContext("2d");
+  context.fillStyle = "rgb(255, 255, 255)";
+  context.strokeStyle = "rgb(0, 0, 0)";
+  context.fillText("Loading...", 10, 10);
 
-  // fire up the game engine
-  Game.intervalID = setInterval(Game.update, 33);
+  // TODO: some form of image pre-loading system instead of this silly thing
+  setTimeout(function(){
+    Game.loadTiles("maps/bigmap.js");
+
+    // fire up the game engine
+    Game.intervalID = setInterval(Game.update, 33);
+  }, 2000);
 });

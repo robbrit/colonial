@@ -50,24 +50,36 @@ Game.Controls = {
     }
   },
 
+  keyDown: function(ev){
+    Game.Controls.keys[ev.keyCode] = true;
+  },
+  keyUp: function(ev){
+    Game.Controls.keys[ev.keyCode] = false;
+  },
+
+  update: function(){
+    if (Game.Controls.keys[38]){ // up
+      Game.display.scroll(0, -Common.scrollSpeed);
+    }else if (Game.Controls.keys[39]){ // right
+      Game.display.scroll(Common.scrollSpeed, 0);
+    }else if (Game.Controls.keys[40]){ // down
+      Game.display.scroll(0, Common.scrollSpeed);
+    }else if (Game.Controls.keys[37]){ // left
+      Game.display.scroll(-Common.scrollSpeed, 0);
+    }
+  },
+
   selectBuilding: function(what){
     Game.building = new Buildings[what]();
     Game.buildingType = what;
-  }
+  },
+
+  keys: {}
 }
 
 $(document)
-  .keypress(function(ev){
-    if (ev.keyCode == 38){ // up
-      Game.display.scroll(0, -Common.scrollSpeed);
-    }else if (ev.keyCode == 39){ // right
-      Game.display.scroll(Common.scrollSpeed, 0);
-    }else if (ev.keyCode == 40){ // down
-      Game.display.scroll(0, Common.scrollSpeed);
-    }else if (ev.keyCode == 37){ // left
-      Game.display.scroll(-Common.scrollSpeed, 0);
-    }
-  });
+  .keyup(Game.Controls.keyUp)
+  .keydown(Game.Controls.keyDown);
 
 $(function(){
   $("#main-canvas")
