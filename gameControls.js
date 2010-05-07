@@ -44,7 +44,7 @@ Game.Controls = {
 
         if (Game.inBounds(coords)){
           var tile = Game.tiles[coords[1]][coords[0]];
-          if (tile.canBuild){
+          if (tile.canBuild()){
             Game.display.tiler.setHover(coords, Game.building);
           }else{
             Game.display.tiler.setHover(coords, "redHover_1_1");

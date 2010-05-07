@@ -67,7 +67,7 @@ Diamond.prototype.render = function(){
   this.renderLayer(this.roadSurface);
   this.renderLayer(this.buildingSurface);
 
-  var sprites = Game.getSprites();
+  var sprites = Game.getPeople();
 
   var sprite, coords, offsetX, offsetY;
   for (var i = 0; i < sprites.length; i++){

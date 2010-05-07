@@ -5,19 +5,32 @@
 </head>
 <body>
 <canvas id = "main-canvas"></canvas>
-<div class = "toolbar">
-  <!-- TODO: I18N on these -->
-  <a href = "#" onclick = "Game.Controls.selectBuilding('road'); return false" class = "building-btn">
-    <img src = "images/buildings/road.png" alt = "Road" title = "Road" />
-  </a>
-  <a href = "#" onclick = "Game.Controls.selectBuilding('plot'); return false" class = "building-btn">
-    <img src = "images/buildings/plot.png" alt = "Plot" title = "Housing Plot" />
-  </a>
-  <a href = "#" onclick = "Game.Controls.selectBuilding('water_hole'); return false" class = "building-btn">
-    <img src = "images/buildings/water-hole.png" alt = "Watering Hole" title = "Watering Hole" />
-  </a>
+<div class = "sidebar">
+  <div class = "toolbar">
+    <!-- TODO: I18N on these -->
+    <a href = "#" onclick = "Game.Controls.selectBuilding('road'); return false" class = "building-btn">
+      <img src = "images/buildings/road.png" alt = "Road" title = "Road" />
+    </a>
+    <a href = "#" onclick = "Game.Controls.selectBuilding('plot'); return false" class = "building-btn">
+      <img src = "images/buildings/plot.png" alt = "Plot" title = "Housing Plot" />
+    </a>
+    <a href = "#" onclick = "Game.Controls.selectBuilding('water_hole'); return false" class = "building-btn">
+      <img src = "images/buildings/water-hole.png" alt = "Watering Hole" title = "Watering Hole" />
+    </a>
+  </div>
+  <div class = "info">
+    <div class = "info-row">
+      <label>Population:</label>
+      <span id = "info-population"></span>
+    </div>
+    <div class = "info-row">
+      <label>Unemployment:</label>
+      <span id = "info-unemployment"></span>
+    </div>
+  </div>
 </div>
 <!-- millions of JS includes -->
+<script type = "text/javascript" src = "extend.js"></script>
 <script type = "text/javascript" src = "jquery-1.4.2.min.js"></script>
 <script type = "text/javascript" src = "json2.js"></script>
 <script type = "text/javascript" src = "common.js"></script>
@@ -29,8 +42,8 @@
 <script type = "text/javascript" src = "tileTypes.js"></script>
 <script type = "text/javascript" src = "resources.js"></script>
 <script type = "text/javascript" src = "ai.js"></script>
-<script type = "text/javascript" src = "sprites.js"></script>
 <script type = "text/javascript" src = "sylvester.js"></script>
+<script type = "text/javascript" src = "people.js"></script>
 <script type = "text/javascript" src = "display.js"></script>
 <script type = "text/javascript" src = "text.js"></script>
 </body>

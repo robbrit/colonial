@@ -8,6 +8,10 @@ var Resources = {
       file: "sprites/immigrant.png",
     },
 
+    jobFinder: {
+      file: "sprites/jobfinder.png",
+    },
+
     plot: {
       file: "buildings/plot.png",
     },
@@ -43,7 +47,8 @@ var Resources = {
 };
 
 Resources.sprites = {
-  immigrant: Resources.images.immigrant
+  immigrant: Resources.images.immigrant,
+  jobFinder: Resources.images.jobFinder
 };
 
 $(function(){

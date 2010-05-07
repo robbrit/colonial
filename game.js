@@ -28,10 +28,19 @@ var Game = {
     if (Game.state == "playing"){
       // delete old messages
       var tooOld = Common.time() - 5000;
-      
       Game.messages = $.grep(Game.messages, function(obj) { return obj.timestamp > tooOld; });
 
-      $.each(Game.objects, function(i, obj) { obj.update(); });
+      // remove deleted people
+      var index;
+      $.each(Game.peopleToRemove, function(i, obj){
+        index = Game.people.indexOf(obj);
+        Game.people.remove(index);
+      });
+      delete Game.peopleToRemove;
+      Game.peopleToRemove = new Array();
+
+      $.each(Game.people, function(i, obj) { obj.update(); });
+      $.each(Game.buildings, function(i, obj) { obj.update(); });
       GameLogic.update();
       Game.display.render();
     }
@@ -48,8 +57,8 @@ var Game = {
     return false;
   },
 
-  getSprites: function(){
-    return Game.objects;
+  getPeople: function(){
+    return Game.people;
   },
 
   getMessages: function(){
@@ -58,6 +67,14 @@ var Game = {
 
   getBuildings: function(){
     return Game.buildings;
+  },
+
+  addPerson: function(person){
+    Game.people.push(person);
+  },
+
+  removePerson: function(person){
+    Game.peopleToRemove.push(person);
   },
 
   addMessage: function(msg){
@@ -80,7 +97,8 @@ var Game = {
   state: "initializing"
 };
 
-Game.objects = new Array();
+Game.people = new Array();
+Game.peopleToRemove = new Array();
 Game.buildings = new Array();
 Game.messages = new Array();
 

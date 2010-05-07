@@ -1,6 +1,5 @@
 function Display(tiles){
   this.tiler = new Diamond(tiles, "#main-canvas");
-  $(".toolbar").height($("#main-canvas").height());
 }
 
 Display.prototype.render = function(){
