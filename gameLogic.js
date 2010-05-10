@@ -41,10 +41,14 @@ var GameLogic = {
   updateFuncs: [
     function(dt){
       // count available housing
-      // TODO: use a list for buildings and iterate over that instead of over every tile
-      var available = Game.findTile(function(tile){
-        return tile.building && tile.building.getCapacity !== undefined && tile.building.getCapacity() > 0;
-      });
+      var available = false;
+      for (var i = 0; i < Game.buildings.length; i++){
+        if (Game.buildings[i].getCapacity !== undefined && Game.buildings[i].getCapacity() > 0){
+          available = Game.buildings[i].location;
+          available = Game.tiles[available[1]][available[0]];
+          break;
+        }
+      }
 
       if (available !== false && Math.random() < 0.05){
         // On a 5% probability, create an immigrant

@@ -24,6 +24,7 @@ var Buildings = {
     this.type = "water_hole";
     this.width = this.height = 2;
 
+    this.carrier = false;
     this.jobs = 2;
   }
 };
@@ -109,6 +110,21 @@ Buildings.plot.prototype.getCapacity = function(person){
   }
 };
 
-Buildings.water_hole.placed = function(coords){
+/*Buildings.water_hole.prototype.placed = function(coords){
   Buildings.basic.placed.call(this, coords);
+};*/
+
+Buildings.water_hole.prototype.update = function(){
+  Buildings.basic.prototype.update.call(this);
+
+  // if we have any workers we should put out a water carrier
+  if (this.workers > 0 && !this.carrier){
+    var road = this.findRoad(1);
+
+    // should randomly place water carrier based on how well-staffed we are
+    if (road){
+      this.carrier = new WaterCarrier(road.xy, this);
+      GameLogic.addPerson(this.carrier);
+    }
+  }
 };

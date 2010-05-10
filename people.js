@@ -18,7 +18,7 @@ Person.prototype.findHouses = function(radius){
   for (var y = Math.max(0, this.location[1] - radius); y <= Math.min(Game.tiles.length - 1, this.location[1] + radius); y++){
     for (var x = Math.max(0, this.location[0] - radius); x <= Math.min(Game.tiles[y].length - 1, this.location[0] + radius); x++){
       if (Game.tiles[y][x].building && Game.tiles[y][x].building.isHouse){
-        return Game.tiles[y][x];
+        return Game.tiles[y][x].building;
       }
     }
   }
@@ -66,6 +66,7 @@ function Wanderer(sprite, start, max){
   this.spaces = 0;
   this.max = max;
   this.visited = new Array();
+  this.speed = 0.08;
 
   this.target = false;
 }
@@ -189,7 +190,6 @@ function JobFinder(start, building){
   Wanderer.call(this, Resources.sprites.jobFinder, start);
 
   this.building = building;
-  this.speed = 0.08;
 }
 
 JobFinder.prototype = new Wanderer();
@@ -208,5 +208,19 @@ JobFinder.prototype.update = function(){
     }
   }else{
     // remove me
+    this.state = "hidden";
+    Game.removePerson(this);
   }
 };
+
+function WaterCarrier(start, building){
+  Wanderer.call(this, Resources.sprites.waterCarrier, start);
+
+  this.building = building;
+}
+WaterCarrier.prototype = new Wanderer();
+
+WaterCarrier.prototype.update = function(){
+  // do something random
+  Wanderer.prototype.update.call(this);
+}
