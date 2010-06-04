@@ -69,6 +69,10 @@ var Game = {
     return Game.buildings;
   },
 
+  getTile: function(xy){
+    return Game.tiles[xy[1]][xy[0]];
+  },
+
   addPerson: function(person){
     Game.people.push(person);
   },

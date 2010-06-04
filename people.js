@@ -153,7 +153,7 @@ function Immigrant(start, target){
 
   this.speed = 0.10;
   this.targetTile = target;
-  this.path = AI.AStar(this, start, target.xy);
+  this.path = AI.GlobalAStar(this, start, target.xy);
 
   if (!this.path){
     Game.addMessage(t("inaccessible_housing"));

@@ -5,7 +5,7 @@ var TileTypes = {
     type: "water",
     loaded: false,
     buildable: false,
-    passable: function(who) { return who.boat === true; }
+    passable: false
   },
   grass: {
     file: "grass.png",
