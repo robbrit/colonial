@@ -1,14 +1,22 @@
 var AI = {
-  AStar: function(criterion){
+  // AStar() takes a criterion function which tests tiles against
+  // some criteria.
+  // AStar() returns a new function that applies A* using the
+  // selected criteria.
+  AStar: function(allow_diagonals, criterion){
     return function(who, start, end){
       // a function for expanding a certain node
       var expand = function(node){
         var res = new Array();
         for (var i = -1; i <= 1; i++){
           for (var j = -1; j <= 1; j++){
-            var next = [node[0] + i, node[1] + j];
-            if ((i != 0 || j != 0) && Game.inBounds(next) && criterion(next)){
-              res.push(next);
+            // need to exclude diagonals unless they are allowed
+            // |i + j| == 1 for non-diagonals
+            if (allow_diagonals || Math.abs(i + j) == 1){
+              var next = [node[0] + i, node[1] + j];
+              if ((i != 0 || j != 0) && Game.inBounds(next) && criterion(next)){
+                res.push(next);
+              }
             }
           }
         }
@@ -72,9 +80,9 @@ var AI = {
 };
 
 // This version of A* allows passable tiles
-AI.GlobalAStar = AI.AStar(function(xy) {
+AI.GlobalAStar = AI.AStar(true, function(xy) {
   return Game.getTile(xy).type.passable === true;
 });
-AI.RoadAStar = AI.AStar(function(xy){
+AI.RoadAStar = AI.AStar(false, function(xy){
   return Game.getTile(xy).road === true;
 });
