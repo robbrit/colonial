@@ -40,6 +40,10 @@ var Resources = {
       file: "buildings/road-br.png"
     },
 
+    shack: {
+      file: "buildings/shack.png"
+    },
+
     waterCarrier: {
       file: "sprites/watercarrier.png"
     },

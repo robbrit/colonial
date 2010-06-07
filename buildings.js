@@ -15,6 +15,7 @@ var Buildings = {
     this.type = "plot";
     this.capacity = 1;
     this.people = 0;
+    this.peopleComing = 0;
     this.isHouse = true;
 
     this.level = 0;
@@ -88,21 +89,24 @@ Buildings.basic.prototype.findRoad = function(radius, width, height){
 /****************
  * Plot Methods *
  ****************/
+Buildings.plot.capacities = [
+  1, 1, 2
+];
 Buildings.plot.prototype.update = function(){
   if (this.people === 0){
     this.level = 0;
-    return;
-  }
-
-  if (this.needs["water"] === true){
-    if (this.level < 2){
-      // promote us to level 2
-      this.level = 2;
-    }
   }else{
-    // demote us to level 1
-    this.level = 1;
+    if (this.needs["water"] === true){
+      if (this.level < 2){
+        // promote us to level 2
+        this.level = 2;
+      }
+    }else{
+      // demote us to level 1
+      this.level = 1;
+    }
   }
+  this.capacity = Buildings.plot.capacities[this.level];
   this.updateImage();
 };
 
@@ -118,38 +122,49 @@ Buildings.plot.prototype.placed = function(coords){
 Buildings.plot.prototype.arrived = function(person){
   person.state = "hidden";
 
-  this.image = Resources.images.hovel;
-  Game.display.tiler.renderBuildings();
+  this.peopleComing--;
+  this.people++;
 };
 
 Buildings.plot.prototype.addPerson = function(person){
-  this.people++;
-
-  if (this.level < 1){
-    this.level = 1;
-    this.updateImage();
-  }
+  this.peopleComing++;
 };
 
 Buildings.plot.prototype.getCapacity = function(person){
-  if (this.capacity == this.people || !this.findRoad()){
+  if (this.capacity == this.people + this.peopleComing || !this.findRoad()){
     return 0;
   }else{
-    return this.capacity - this.people;
+    return this.capacity - this.people - this.peopleComing;
   }
 };
 
 Buildings.plot.prototype.updateImage = function(){
-  // TODO: set our image based on our level
+  var lastImage = this.image;
+
+  if (this.level === 0){
+    this.image = Resources.images.plot;
+  }else if (this.level == 1){
+    this.image = Resources.images.hovel;
+  }else if (this.level == 2){
+    this.image = Resources.images.shack;
+  }
+
+  if (this.image != lastImage){
+    // TODO: shouldn't call renderBuildings, should trigger a flag instead
+    Game.display.tiler.renderBuildings();
+  }
 };
 
 Buildings.plot.prototype.addResource = function(resource, amount){
-  if (amount === undefined){
-    this.needs[resource] = true;
-  }else if (this.needs[resource] === undefined){
-    this.needs[resource] = amount;
-  }else{
-    this.needs[resource] += amount;
+  // a house can only get resources if there is someone living there
+  if (this.level > 0){
+    if (amount === undefined){
+      this.needs[resource] = true;
+    }else if (this.needs[resource] === undefined){
+      this.needs[resource] = amount;
+    }else{
+      this.needs[resource] += amount;
+    }
   }
 };
 

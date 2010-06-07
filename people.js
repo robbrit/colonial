@@ -98,7 +98,7 @@ function Wanderer(sprite, start, max){
 
   this.state = "wandering";
   this.speed = 0.08;
-  this.waitTime = 250;
+  this.waitTime = 250; // this should be adjustable based on the building's employment level
 
   this.target = false;
 }
