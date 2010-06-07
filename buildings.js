@@ -16,6 +16,9 @@ var Buildings = {
     this.capacity = 1;
     this.people = 0;
     this.isHouse = true;
+
+    this.level = 0;
+    this.needs = {};
   },
 
   water_hole: function(xy){
@@ -82,6 +85,27 @@ Buildings.basic.prototype.findRoad = function(radius, width, height){
   return false;
 };
 
+/****************
+ * Plot Methods *
+ ****************/
+Buildings.plot.prototype.update = function(){
+  if (this.people === 0){
+    this.level = 0;
+    return;
+  }
+
+  if (this.needs["water"] === true){
+    if (this.level < 2){
+      // promote us to level 2
+      this.level = 2;
+    }
+  }else{
+    // demote us to level 1
+    this.level = 1;
+  }
+  this.updateImage();
+};
+
 Buildings.plot.prototype.placed = function(coords){
   this.location = coords;
 
@@ -100,6 +124,11 @@ Buildings.plot.prototype.arrived = function(person){
 
 Buildings.plot.prototype.addPerson = function(person){
   this.people++;
+
+  if (this.level < 1){
+    this.level = 1;
+    this.updateImage();
+  }
 };
 
 Buildings.plot.prototype.getCapacity = function(person){
@@ -110,10 +139,23 @@ Buildings.plot.prototype.getCapacity = function(person){
   }
 };
 
-/*Buildings.water_hole.prototype.placed = function(coords){
-  Buildings.basic.placed.call(this, coords);
-};*/
+Buildings.plot.prototype.updateImage = function(){
+  // TODO: set our image based on our level
+};
 
+Buildings.plot.prototype.addResource = function(resource, amount){
+  if (amount === undefined){
+    this.needs[resource] = true;
+  }else if (this.needs[resource] === undefined){
+    this.needs[resource] = amount;
+  }else{
+    this.needs[resource] += amount;
+  }
+};
+
+/*************************
+ * Watering Hole Methods *
+ *************************/
 Buildings.water_hole.prototype.update = function(){
   Buildings.basic.prototype.update.call(this);
 

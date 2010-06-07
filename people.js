@@ -14,18 +14,30 @@ function Person(sprite, xy, offsetxy){
   this.render_state = "showing";
 }
 
-Person.prototype.findHouses = function(radius){
+Person.prototype.findHouses = function(radius, multiple){
   if (radius === undefined){
     radius = 2;
   }
+  if (multiple === undefined){
+    multiple = false;
+  }
+  var houses = new Array();
   for (var y = Math.max(0, this.location[1] - radius); y <= Math.min(Game.tiles.length - 1, this.location[1] + radius); y++){
     for (var x = Math.max(0, this.location[0] - radius); x <= Math.min(Game.tiles[y].length - 1, this.location[0] + radius); x++){
       if (Game.tiles[y][x].building && Game.tiles[y][x].building.isHouse){
-        return Game.tiles[y][x].building;
+        if (multiple){
+          houses.push(Game.tiles[y][x].building);
+        }else{
+          return Game.tiles[y][x].building;
+        }
       }
     }
   }
-  return false;
+  if (multiple){
+    return houses;
+  }else{
+    return false;
+  }
 };
 
 Person.prototype.getLocation = function(){
@@ -86,7 +98,7 @@ function Wanderer(sprite, start, max){
 
   this.state = "wandering";
   this.speed = 0.08;
-  this.waitTime = 400;
+  this.waitTime = 250;
 
   this.target = false;
 }
@@ -95,7 +107,7 @@ Wanderer.prototype = new Person();
 Wanderer.serviceUpdate = function(service){
   return function(){
     if (this.state != "at home"){
-      service();
+      service(this);
 
       // do regular wandering stuff
       Wanderer.prototype.update.call(this);
@@ -295,6 +307,11 @@ function WaterCarrier(start, building){
 }
 WaterCarrier.prototype = new Wanderer();
 
-WaterCarrier.prototype.update = Wanderer.serviceUpdate(function(){
-  // TODO: fill the nearby houses water
+WaterCarrier.prototype.update = Wanderer.serviceUpdate(function(me){
+  // give water to nearby houses
+  var houses = me.findHouses(2, true);
+
+  for (var i = 0; i < houses.length; i++){
+    houses[i].addResource("water");
+  }
 });
