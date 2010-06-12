@@ -33,3 +33,7 @@ a.building-btn{
   width: 50px;
   text-align: center;
 }
+
+#help{
+  display: none;
+}
