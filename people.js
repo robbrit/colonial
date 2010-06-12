@@ -278,24 +278,22 @@ function JobFinder(start, building){
  ********************/
 JobFinder.prototype = new Wanderer();
 
-JobFinder.prototype.update = function(){
-  if (this.building.needsWorkers()){
+JobFinder.prototype.update = Wanderer.serviceUpdate(function(me){
+  if (me.building.needsWorkers()){
     // look around for houses
-    var house = this.findHouses();
+    var house = me.findHouses();
 
     var unemp;
     if (house && house.people > 0 && GameLogic.unemployment() > 0){
-      this.building.workers++;
+      me.building.workers++;
       GameLogic.addJob();
-    }else{
-      Wanderer.prototype.update.call(this);
     }
   }else{
     // remove me
-    this.hide();
-    Game.removePerson(this);
+    me.hide();
+    Game.removePerson(me);
   }
-};
+});
 
 /***********************
  *    Water Carrier    *
