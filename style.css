@@ -30,7 +30,8 @@ a img{
 a.building-btn{
   display: block;
   float: left;
-  width: 50px;
+  width: 30px;
+  height: 30px;
   text-align: center;
 }
 

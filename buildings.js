@@ -1,18 +1,39 @@
 var Buildings = {
-  basic: function(xy){
-    this.location = xy;
-    this.width = 1;
-    this.height = 1;
-    this.jobs = 0;
-    this.workers = 0;
-    this.isHouse = false;
-    this.jobFinder = false;
+  basic: function(xy, type){
+    if (type !== undefined){
+      this.location = xy;
+      this.image = Resources.images[type];
+      this.type = type;
+
+      // set a bunch of defaults
+      this.width = 1;
+      this.height = 1;
+      this.jobs = 0;
+      this.workers = 0;
+      this.isHouse = false;
+      this.needsRoad = true;
+      this.jobFinder = false;
+
+      this.usesLabourCamp = false;
+    }
   },
 
+  corn_field: function(xy){
+    Buildings.basic.call(this, xy, "corn_field");
+
+    this.width = this.height = 3;
+
+    this.production = 0;
+    this.totalProduction = 10000;
+    this.jobs = 1;
+    this.workersHere = [];
+    this.usesLabourCamp = true;
+  },
+
+
   plot: function(xy){
-    Buildings.basic.call(this, xy);
-    this.image = Resources.images.plot;
-    this.type = "plot";
+    Buildings.basic.call(this, xy, "plot");
+
     this.capacity = 1;
     this.people = 0;
     this.peopleComing = 0;
@@ -22,21 +43,39 @@ var Buildings = {
     this.needs = {};
   },
 
+  silo: function(xy){
+    Buildings.basic.call(this, xy, "silo");
+
+    this.width = this.height = 2;
+
+    this.jobs = 10;
+  },
+
   water_hole: function(xy){
-    Buildings.basic.call(this, xy);
-    this.image = Resources.images.water_hole;
-    this.type = "water_hole";
+    Buildings.basic.call(this, xy, "water_hole");
     this.width = this.height = 2;
 
     this.carrier = false;
     this.jobs = 2;
+  },
+
+  work_camp: function(xy){
+    Buildings.basic.call(this, xy, "work_camp");
+    this.width = this.height = 2;
+
+    this.jobs = 10;
+    this.workerObjs = new Array();
   }
 };
 Buildings.plot.prototype = new Buildings.basic();
 Buildings.water_hole.prototype = new Buildings.basic();
+Buildings.corn_field.prototype = new Buildings.basic();
+Buildings.work_camp.prototype = new Buildings.basic();
 
 Buildings.basic.prototype.update = function() {
-  if (this.needsWorkers() && this.jobFinder === false){
+  // certain buildings use a job finder to find labourers,
+  // so send one out if we need workers
+  if (this.usesLabourCamp === false && this.needsWorkers() && this.jobFinder === false){
     var road = this.findRoad(1);
 
     if (road){
@@ -50,7 +89,9 @@ Buildings.basic.prototype.needsWorkers = function() { return this.workers < this
 Buildings.basic.prototype.placed = function(coords){
   this.location = coords;
   
-  if (!this.findRoad(1)){
+  // certain buildings need to be near a road, so output a message if that is the case
+  // here
+  if (this.needsRoad && !this.findRoad(1)){
     Game.addMessage(t("must_be_near_road"));
   }
 
@@ -64,6 +105,10 @@ Buildings.basic.prototype.placed = function(coords){
       }
     }
   }
+};
+
+Buildings.basic.prototype.addWorker = function(){
+  this.workers++;
 };
 
 Buildings.basic.prototype.findRoad = function(radius, width, height){
@@ -182,6 +227,65 @@ Buildings.water_hole.prototype.update = function(){
     if (road){
       this.carrier = new WaterCarrier(road.xy, this);
       GameLogic.addPerson(this.carrier);
+    }
+  }
+};
+
+/*************************
+ *   Work Camp Methods   *
+ *************************/
+Buildings.work_camp.prototype.update = function(){
+  Buildings.basic.prototype.update.call(this);
+
+  // if we have any workers look for places that need work
+  var idleWorkers = this.idleWorkers();
+  if (idleWorkers.length > 0){
+    // Might need to iterate over non-housing buildings
+    for (var i = 0; i < Game.buildings.length; i++){
+      var building = Game.buildings[i];
+
+      if (building.usesLabourCamp && building.needsWorkers()){
+        // send a worker to this building
+        // TODO: make the worker follow a road
+        var worker = idleWorkers.shift();
+
+        worker.assignWorkplace(building);
+        building.addWorker();
+
+        worker.location = this.location;
+        worker.moveToBuilding(building);
+        Game.addPerson(worker);
+      }
+    }
+  }
+};
+
+Buildings.work_camp.prototype.addWorker = function(){
+  this.workers++;
+  this.workerObjs.push(new Worker(this.location, this));
+};
+
+Buildings.work_camp.prototype.idleWorkers = function(){
+  return $.grep(this.workerObjs, function(obj) { return !obj.isWorking(); });
+};
+
+/*****************************
+ *     Corn Field Methods    *
+ *****************************/
+Buildings.corn_field.prototype.workerArrived = function(who){
+  this.workersHere.push(who);
+};
+
+Buildings.corn_field.prototype.update = function(){
+  Buildings.basic.prototype.update.call(this);
+
+  if (this.workersHere.length > 0){
+    this.production++;
+
+    if (this.production >= this.totalProduction){
+      this.production = 0;
+
+      // TODO: send the worker to a silo
     }
   }
 };

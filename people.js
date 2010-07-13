@@ -10,10 +10,13 @@ function Person(sprite, xy, offsetxy){
   this.offset = offsetxy;
   this.sprite = sprite;
   this.vel = false;
+  this.target = false;
+  this.targetQueue = new Array();
+  this.speed = 0.10;
 
   this.render_state = "showing";
-}
-
+  this.canMoveOffroad = false;
+} 
 Person.prototype.findHouses = function(radius, multiple){
   if (radius === undefined){
     radius = 2;
@@ -57,7 +60,24 @@ Person.prototype.move = function(){
 Person.prototype.stop = function(){
   this.offset = $V([0, 0]);
   this.vel = $V([0, 0]);
-}
+};
+
+Person.prototype.arrived = function(){
+  this.setNewTarget(false);
+};
+
+Person.prototype.moveToBuilding = function(target){
+  this.targetTile = target;
+
+  this.targetQueue = AI.GlobalAStar(this, this.location, target.xy || target.location);
+
+  if (this.targetQueue){
+    this.targetQueue.shift(); // A* includes the start
+    this.setNewTarget(this.targetQueue.shift());
+  }else{
+    // no path!
+  }
+};
 
 Person.prototype.setNewTarget = function(target){
   if (target){
@@ -69,22 +89,55 @@ Person.prototype.setNewTarget = function(target){
 
   this.offset.elements[0] = 0;
   this.offset.elements[1] = 0;
-}
+};
 
 Person.prototype.vectorize = function(){
   this.vlocation = $V(this.location);
   this.vel = this.target.subtract(this.vlocation).toUnitVector().multiply(this.speed);
-}
+};
 
 Person.prototype.shouldDisplay = function(){
   return this.render_state != "hidden";
-}
+};
 Person.prototype.hide = function(){
   this.render_state = "hidden";
-}
+};
 Person.prototype.show = function(){
   this.render_state = "showing";
-}
+};
+
+Person.prototype.update = function(){
+  // find a target
+  if (this.target === false){
+    this.setNewTarget(this.nextTile());
+  }
+
+  if (this.target !== false){
+    // check to see if we've arrived at where we are going
+    var dist = this.offset.add($V(this.location)).subtract(this.target);
+    if (dist.dot(dist) <= this.speed * this.speed){
+      this.location = this.target.elements;
+
+      var target = this.nextTile();
+
+      if (target === false){
+        this.arrived();
+      }else{
+        this.setNewTarget(target);
+      }
+    }
+  }
+
+  this.move();
+};
+Person.prototype.nextTile = function(){
+  if (this.targetQueue.length > 0){
+    return this.targetQueue.shift();
+  }else{
+    return false;
+  }
+};
+
 
 /******************
  *    Wanderer    *
@@ -99,8 +152,6 @@ function Wanderer(sprite, start, max){
   this.state = "wandering";
   this.speed = 0.08;
   this.waitTime = 250; // this should be adjustable based on the building's employment level
-
-  this.target = false;
 }
 Wanderer.prototype = new Person();
 
@@ -121,31 +172,8 @@ Wanderer.serviceUpdate = function(service){
   };
 };
 
-Wanderer.prototype.update = function(){
-  // find a target
-  if (this.target === false){
-    this.setNewTarget(this.nextTile());
-  }
-
-  // check to see if we've arrived at where we are going
-  var dist = this.offset.add($V(this.location)).subtract(this.target);
-  if (dist.dot(dist) <= this.speed * this.speed){
-    this.location = this.target.elements;
-
-    var target = this.nextTile();
-
-    if (target === false){
-      this.arrived();
-    }else{
-      this.setNewTarget(target);
-    }
-  }else{
-    this.move();
-  }
-};
-
 Wanderer.prototype.arrived = function() {
-  this.setNewTarget(false);
+  Person.prototype.arrived.call(this);
 
   if (this.state == "going home"){
     // note: default wanderers will never have this,
@@ -221,44 +249,30 @@ Wanderer.prototype.getRandomRoads = function(){
   return path;
 }
 
-Wanderer.prototype.nextTile = function(){
-  if (this.targetQueue.length > 0){
-    return this.targetQueue.shift();
-  }else{
-    return false;
-  }
-};
-
 function Immigrant(start, target){
   Person.call(this, Resources.sprites.immigrant, start);
 
-  this.speed = 0.10;
-  this.targetTile = target;
-  this.path = AI.GlobalAStar(this, start, target.xy);
+  this.canMoveOffroad = true;
+  this.moveToBuilding(target);
 
-  if (!this.path){
+  if (!this.targetQueue){
     Game.addMessage(t("inaccessible_housing"));
-  }else{
-    this.path.shift(); // AStar returns the start already in there
-    this.target = $V(this.path.shift());
-
-    this.vectorize();
   }
 }
 Immigrant.prototype = new Person();
 
 Immigrant.prototype.update = function(){
-  if (this.path){
+  if (this.targetQueue){
     var dist = this.offset.add($V(this.location)).subtract(this.target);
     if (dist.dot(dist) <= this.speed * this.speed){
       // we're here! are we at our final target?
-      if (this.path.length == 0){
+      if (this.targetQueue.length == 0){
         // TODO: check to see if the building is still here
         this.targetTile.building.arrived(this);
         Game.removePerson(this);
       }else{
         this.location = this.target.elements;
-        this.setNewTarget($V(this.path.shift()));
+        this.setNewTarget($V(this.targetQueue.shift()));
       }
     }else{
       // move
@@ -285,7 +299,7 @@ JobFinder.prototype.update = Wanderer.serviceUpdate(function(me){
 
     var unemp;
     if (house && house.people > 0 && GameLogic.unemployment() > 0){
-      me.building.workers++;
+      me.building.addWorker();
       GameLogic.addJob();
     }
   }else{
@@ -313,3 +327,27 @@ WaterCarrier.prototype.update = Wanderer.serviceUpdate(function(me){
     houses[i].addResource("water");
   }
 });
+
+/**********************
+ *       Worker       *
+ **********************/
+function Worker(start, building){
+  Person.call(this, Resources.sprites.worker, start);
+
+  this.camp = building;
+  this.working = false;
+  this.workplace = null;
+  this.canMoveOffroad = true;
+}
+Worker.prototype = new Person();
+
+Worker.prototype.isWorking = function() { return this.working; }
+
+Worker.prototype.assignWorkplace = function(building){
+  this.working = true;
+  this.workplace = building;
+};
+
+Worker.prototype.update = function(){
+  Person.prototype.update.call(this);
+};
