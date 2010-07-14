@@ -158,8 +158,7 @@ Diamond.prototype.renderRoads = function(){
   }
   var context = this.roadSurface.getContext("2d");
 
-  context.fillStyle = "rgba(255, 255, 255, 0)";
-  context.fillRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+  context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 
   var coords;
   for (var y = 0; y < this.tiles.length; y++){
@@ -191,8 +190,7 @@ Diamond.prototype.renderBuildings = function(){
   }
   var context = this.buildingSurface.getContext("2d");
 
-  context.fillStyle = "rgba(255, 255, 255, 0)";
-  context.fillRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+  context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 
   var coords;
 

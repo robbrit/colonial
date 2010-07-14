@@ -39,6 +39,16 @@ var Game = {
       delete Game.peopleToRemove;
       Game.peopleToRemove = new Array();
 
+      if (Game.buildingsToRemove.length > 0){
+        $.each(Game.buildingsToRemove, function(i, obj){
+          index = Game.buildings.indexOf(obj);
+          Game.buildings.remove(index);
+        });
+        delete Game.buildingsToRemove;
+        Game.buildingsToRemove = new Array();
+        Game.display.tiler.renderBuildings();
+      }
+
       $.each(Game.people, function(i, obj) { obj.update(); });
       $.each(Game.buildings, function(i, obj) { obj.update(); });
       GameLogic.update();
@@ -69,6 +79,10 @@ var Game = {
     return Game.buildings;
   },
 
+  removeBuilding: function(building){
+    Game.buildingsToRemove.push(building);
+  },
+
   getTile: function(xy){
     return Game.tiles[xy[1]][xy[0]];
   },
@@ -92,8 +106,11 @@ var Game = {
     });
   },
 
-  inBounds: function(xy){
-    return this.display.tiler.inBounds(xy);
+  inBounds: function(x, y){
+    if (y !== undefined){
+      x = [x, y];
+    }
+    return this.display.tiler.inBounds(x);
   },
 
   tiles: false,
@@ -104,6 +121,7 @@ var Game = {
 Game.people = new Array();
 Game.peopleToRemove = new Array();
 Game.buildings = new Array();
+Game.buildingsToRemove = new Array();
 Game.messages = new Array();
 
 $(function(){

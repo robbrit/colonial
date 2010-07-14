@@ -29,6 +29,10 @@ var Resources = {
     redHover_3_3: {
       file: "util/red-hover-3-3.png"
     },
+    
+    redX: {
+      file: "util/red-x.png"
+    },
 
     road: {
       file: "buildings/road.png"

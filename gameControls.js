@@ -1,23 +1,28 @@
 Game.Controls = {
   onClick: function(ev){
-    if (Game.building && Game.building != "road"){
+    if (Game.building && Game.building != "road" && Game.building != "destroy"){
       // TODO: add money
-      // TODO: allow dragging for road construction
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
-      if (Game.inBounds(coords)){
-        var tile = Game.tiles[coords[1]][coords[0]];
-        if (tile.canBuild()){
-          /*if (Game.building == "road"){
-            tile.road = true;
-            Game.display.tiler.renderRoads();
-          }else{*/
-            tile.building = Game.building;
-            tile.building.placed(coords);
-            Game.buildings.push(Game.building);
-            Game.building = new Buildings[Game.buildingType]();
-            Game.display.tiler.renderBuildings();
-          //}
+
+      var canBuild = true;
+
+      // check all nearby tiles
+      for (var i = 0; i < Game.building.width; i++){
+        for (var j = 0; j < Game.building.height; j++){
+          if (Game.inBounds(coords[1] + j, coords[0] + i)){
+            var tile = Game.tiles[coords[1] + j][coords[0] + i];
+            if (!tile.canBuild()){
+              canBuild = false;
+            }
+          }
         }
+      }
+
+      if (canBuild){
+        Game.building.placed(coords);
+        Game.buildings.push(Game.building);
+        Game.building = new Buildings[Game.buildingType]();
+        Game.display.tiler.renderBuildings();
       }
     }
   },
@@ -30,6 +35,8 @@ Game.Controls = {
 
     if (Game.building == "road"){
       Game.Controls.placeRoad(ev);
+    }else if (Game.building == "destroy"){
+      Game.Controls.destroyAt(ev);
     }
   },
 
@@ -50,6 +57,11 @@ Game.Controls = {
             Game.display.tiler.setHover(coords, "redHover_1_1");
           }
         }
+      }
+    }else if (Game.building == "destroy"){
+      // TODO: make a destroy hover image
+      if (Game.Controls.isMouseDown){
+        Game.Controls.destroyAt(ev);
       }
     }else if (Game.building){
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
@@ -108,6 +120,8 @@ Game.Controls = {
   selectBuilding: function(what){
     if (what == "road"){
       Game.building = Game.buildingType = "road";
+    }else if (what == "destroy"){
+      Game.building = Game.buildingType = "destroy";
     }else{
       Game.building = new Buildings[what]();
       Game.buildingType = what;
@@ -120,6 +134,23 @@ Game.Controls = {
       var tile = Game.tiles[coords[1]][coords[0]];
       if (tile.canBuild()){
         tile.road = true;
+        Game.display.tiler.renderRoads();
+      }
+    }
+  },
+
+  destroyAt: function(ev){
+    // destroy the building wherever we are
+    var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
+
+    if (Game.inBounds(coords)){
+      var tile = Game.tiles[coords[1]][coords[0]];
+
+      if (tile.building){
+        tile.building.remove();
+        Game.removeBuilding(tile.building);
+      }else if (tile.road){
+        tile.road = false;
         Game.display.tiler.renderRoads();
       }
     }

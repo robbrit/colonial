@@ -96,15 +96,25 @@ Buildings.basic.prototype.placed = function(coords){
   }
 
   // cover up nearby tiles
-  if (this.width > 1 || this.height > 1){
-    for (var y = 0; y < this.height; y++){
-      for (var x = 0; x < this.width; x++){
-        if (y != 0 || x != 0){
-          Game.tiles[y][x].building = true;
-        }
-      }
+  for (var i = 0; i < this.height; i++){
+    for (var j = 0; j < this.width; j++){
+      Game.tiles[this.location[1] + i][this.location[0] + j].building = this;
     }
   }
+};
+
+Buildings.basic.prototype.remove = function(){
+  // clear off all my tiles
+  for (var i = 0; i < this.width; i++){
+    for (var j = 0; j < this.height; j++){
+      Game.tiles[this.location[1] + j][this.location[0] + i].building = false;
+    }
+  }
+
+  GameLogic.removeJob(this.workers);
+
+  // TODO: work camp places need to fire workers
+  // TODO: Housing plots need to remove population
 };
 
 Buildings.basic.prototype.addWorker = function(){
@@ -157,6 +167,7 @@ Buildings.plot.prototype.update = function(){
 
 Buildings.plot.prototype.placed = function(coords){
   this.location = coords;
+  Game.tiles[this.location[1]][this.location[0]].building = this;
 
   // check for a road nearby
   if (!this.findRoad()){
