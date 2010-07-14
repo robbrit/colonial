@@ -7,35 +7,39 @@
 <canvas id = "main-canvas"></canvas>
 <div class = "sidebar">
   <div class = "toolbar">
-    <!-- TODO: I18N on these -->
+    <!--<a href = "#" onclick = "Game.Controls.selectBuilding('destroy'); return false" class = "building-btn">
+      <img src = "images/util/red-x.png" id = "btn_destroy" alt = "" />
+    </a>-->
     <a href = "#" onclick = "Game.Controls.selectBuilding('road'); return false" class = "building-btn">
-      <img src = "images/buildings/road.png" alt = "Road" title = "Road" />
+      <img src = "images/buildings/road.png" id = "btn_road" alt = "" />
     </a>
     <a href = "#" onclick = "Game.Controls.selectBuilding('plot'); return false" class = "building-btn">
-      <img src = "images/buildings/plot.png" alt = "Plot" title = "Housing Plot" />
+      <img src = "images/buildings/plot.png" id = "btn_housing_plot" alt = "" />
     </a>
     <a href = "#" onclick = "Game.Controls.selectBuilding('water_hole'); return false" class = "building-btn">
-      <img src = "images/resources/water.png" alt = "Watering Hole" title = "Watering Hole" />
+      <img src = "images/resources/water.png" id = "btn_water_hole" alt = "" />
     </a>
     <a href = "#" onclick = "Game.Controls.selectBuilding('corn_field'); return false" class = "building-btn">
-      <img src = "images/resources/corn.png" alt = "Corn Field" title = "Corn Field" />
+      <img src = "images/resources/corn.png" id = "btn_corn_field" alt = "" />
     </a>
     <a href = "#" onclick = "Game.Controls.selectBuilding('work_camp'); return false" class = "building-btn">
-      <img src = "images/resources/labour.png" alt = "Work Camp" title = "Work Camp" />
+      <img src = "images/resources/labour.png" id = "btn_work_camp" alt = "" />
     </a>
   </div>
   <div class = "info">
     <div class = "info-row">
-      <label>Population:</label>
+      <label class = "i18n" id = "label_population"></label>
       <span id = "info-population"></span>
     </div>
     <div class = "info-row">
-      <label>Unemployment:</label>
+      <label class = "i18n" id = "label_unemployment"></label>
       <span id = "info-unemployment"></span>
     </div>
   </div>
 </div>
-<a href = "#" onclick = "$('#help').toggle()">Help</a>
+<a href = "#" onclick = "$('#help').toggle()">Help</a><br />
+<a href = "#" onclick = "Text.setLang('en')">en</a> 
+<a href = "#" onclick = "Text.setLang('fr')">fr</a> 
 <div id = "help">
   <h2>Housing</h2>
   <p>In order to get people into your city, you need to build houses. You do this by placing
@@ -65,5 +69,9 @@
 <script type = "text/javascript" src = "people.js"></script>
 <script type = "text/javascript" src = "display.js"></script>
 <script type = "text/javascript" src = "text.js"></script>
+<script type = "text/javascript">
+// init i18n stuff
+$(Text.reload);
+</script>
 </body>
 </html>
