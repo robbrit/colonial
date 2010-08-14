@@ -12,6 +12,8 @@ Text.en = {
   housing_plot: "Housing Plot",
   inaccessible_housing: "Some housing plots are inaccessible.",
   must_be_near_road: "This building must be adjacent to a road.",
+  plot: "Housing Plot",
+  plot_body: "",
   plot_too_far: "Some housing plots are too far from a road.",
   population: "Population",
   road: "Road",
@@ -22,15 +24,18 @@ Text.en = {
 };
 
 Text.fr = {
-  corn_field: "Champ de Ma&iumlat;s",
-  destroy: "D&eacute;truire",
+  corn_field: "Champ de Maïs",
+  corn_field_body: "C'est un champ de maïs.",
+  destroy: "Détruire",
   housing_plot: "Logement",
   inaccessible_housing: "Il y a des logements qui sont inaccessible.",
   must_be_near_road: "Cet édifice doit être adjacent à une rue.",
+  plot: "Logement",
+  plot_body: "",
   plot_too_far: "Il y a des logements qui ne sont pas adjacent à une rue.",
   population: "Population",
   road: "Rue",
-  unemployment: "Ch&ocirc;mage",
+  unemployment: "Chômage",
   water_hole: "Fontaine",
   work_camp: "Camp de Travail"
 };
