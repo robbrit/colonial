@@ -293,6 +293,27 @@ Diamond.prototype.setHoverRoad = function(start, end){
   this.renderLayer(this.hoverSurface);
 };
 
+Diamond.prototype.setHoverPlots = function(start, end){
+  if (!this.hoverSurface){
+    this.hoverSurface = Common.createHiddenSurface(this.backgroundSize.width, this.backgroundSize.height);
+  }
+  var context = this.buildingSurface.getContext("2d");
+
+  context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+
+  if (start !== undefined && end !== undefined){
+    var renderer = this;
+    Game.houseBlock(start, end, function(tile){
+      if (tile.canBuild()){
+        var coords = renderer.toScreenCoords(tile.xy, false);
+        context.drawImage(Resources.images.plot.image, coords[0], coords[1]);
+      }
+    });
+  }
+
+  this.renderLayer(this.hoverSurface);
+};
+
 Diamond.prototype.colourHover = function(clear){
   if (this.inBounds(this.hover.pos)){
     if (clear){

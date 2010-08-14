@@ -1,6 +1,6 @@
 Game.Controls = {
   onClick: function(ev){
-    if (Game.building && Game.building != "road" && Game.building != "destroy"){
+    if (Game.building && Game.building != "road" && Game.building != "destroy" && Game.buildingType != "plot"){
       // TODO: add money
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
 
@@ -19,9 +19,7 @@ Game.Controls = {
       }
 
       if (canBuild){
-        Game.building.placed(coords);
-        Game.buildings.push(Game.building);
-        Game.building = new Buildings[Game.buildingType]();
+        Game.placeBuilding(coords);
         Game.display.tiler.renderBuildings();
       }
     }
@@ -43,7 +41,7 @@ Game.Controls = {
   mouseDown: function(ev){
     Game.Controls.isMouseDown = true;
 
-    if (Game.building == "road"){
+    if (Game.building == "road" || Game.buildingType == "plot"){
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
 
       if (Game.inBounds(coords)){
@@ -54,11 +52,18 @@ Game.Controls = {
   mouseUp: function(ev){
     Game.Controls.isMouseDown = false;
 
+    var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
     if (Game.building == "road"){
-      var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
+      Game.display.tiler.setHoverRoad();
       Game.Controls.placeRoad(Game.Controls.mouseAnchor, coords);
     }else if (Game.building == "destroy"){
       Game.Controls.destroyAt(ev);
+    }else if (Game.buildingType == "plot"){
+      Game.houseBlock(Game.Controls.mouseAnchor, coords, function(tile){
+        Game.placeBuilding(tile.xy);
+      });
+      Game.display.tiler.setHoverPlots();
+      Game.display.tiler.renderBuildings();
     }
   },
 
@@ -91,9 +96,8 @@ Game.Controls = {
         Game.Controls.destroyAt(ev);
       }
     }else if (Game.building){
+      var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
       if (Game.playing()){
-        var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
-
         var width = (Game.building == "road" ? 1 : Game.building.width);
         var height = (Game.building == "road" ? 1 : Game.building.height);
 
@@ -117,6 +121,11 @@ Game.Controls = {
         }else{
           Game.display.tiler.setHover(coords, "redHover_" + width + "_" + height);
         }
+      }
+
+      if (Game.Controls.isMouseDown && Game.buildingType == "plot"){
+        Game.display.tiler.setHover();
+        Game.display.tiler.setHoverPlots(Game.Controls.mouseAnchor, coords);
       }
     }
   },

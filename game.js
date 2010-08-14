@@ -147,6 +147,28 @@ var Game = {
     return true;
   },
 
+  houseBlock: function(start, end, func){
+    var startx = Math.min(start[0], end[0]);
+    var starty = Math.min(start[1], end[1]);
+    var endx = Math.max(start[0], end[0]);
+    var endy = Math.max(start[1], end[1]);
+
+    for (var y = starty; y <= endy; y++){
+      for (var x = startx; x <= endx; x++){
+        var tile = Game.getTile(x, y);
+        if (tile){
+          func(tile);
+        }
+      }
+    }
+  },
+
+  placeBuilding: function(coords){
+    Game.building.placed(coords);
+    Game.buildings.push(Game.building);
+    Game.building = new Buildings[Game.buildingType]();
+  },
+
   addMessage: function(msg){
     // message queue can only be 10 messages long
     if (Game.messages.length == 10){
