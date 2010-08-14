@@ -38,3 +38,27 @@ a.building-btn{
 #help{
   display: none;
 }
+
+.dialog {
+  display: none;
+  position: absolute;
+  border: 1px solid black;
+  background-color: white;
+  text-align: center;
+}
+
+.dialog p {
+  width: 80%;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.close-btn {
+  float: right;
+  color: red;
+  font-weight: bold;
+  display: block;
+  text-decoration: none;
+  font-family: Arial;
+  margin-right: 2px;
+}

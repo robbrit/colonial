@@ -160,27 +160,34 @@ Diamond.prototype.renderRoads = function(){
 
   context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 
-  var coords;
   for (var y = 0; y < this.tiles.length; y++){
     for (var x = 0; x < this.tiles[y].length; x++){
       if (this.tiles[y][x].road){
-        coords = this.toScreenCoords([x, y], false);
-        context.drawImage(Resources.images.road.image, coords[0], coords[1]);
-
-        if (x > 0 && this.tiles[y][x - 1].road){
-          context.drawImage(Resources.images.road_bl.image, coords[0], coords[1]);
-        }
-        if (y > 0 && this.tiles[y - 1][x].road){
-          context.drawImage(Resources.images.road_tl.image, coords[0], coords[1]);
-        }
-        if (x < this.tiles[y].length - 1 && this.tiles[y][x + 1].road){
-          context.drawImage(Resources.images.road_tr.image, coords[0], coords[1]);
-        }
-        if (y < this.tiles.length - 1 && this.tiles[y + 1][x].road){
-          context.drawImage(Resources.images.road_br.image, coords[0], coords[1]);
-        }
+        this.drawRoad(context, x, y);
       }
     }
+  }
+};
+
+Diamond.prototype.drawRoad = function(context, x, y){
+  if (y === undefined){
+    y = x[1];
+    x = x[0];
+  }
+  var coords = this.toScreenCoords([x, y], false);
+  context.drawImage(Resources.images.road.image, coords[0], coords[1]);
+
+  if (x > 0 && this.tiles[y][x - 1].road){
+    context.drawImage(Resources.images.road_bl.image, coords[0], coords[1]);
+  }
+  if (y > 0 && this.tiles[y - 1][x].road){
+    context.drawImage(Resources.images.road_tl.image, coords[0], coords[1]);
+  }
+  if (x < this.tiles[y].length - 1 && this.tiles[y][x + 1].road){
+    context.drawImage(Resources.images.road_tr.image, coords[0], coords[1]);
+  }
+  if (y < this.tiles.length - 1 && this.tiles[y + 1][x].road){
+    context.drawImage(Resources.images.road_br.image, coords[0], coords[1]);
   }
 };
 
@@ -268,13 +275,30 @@ Diamond.prototype.setHover = function(xy, object){
   }
 };
 
+Diamond.prototype.setHoverRoad = function(start, end){
+  if (!this.hoverSurface){
+    this.hoverSurface = Common.createHiddenSurface(this.backgroundSize.width, this.backgroundSize.height);
+  }
+  var context = this.buildingSurface.getContext("2d");
+
+  context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+
+  if (start !== undefined && end !== undefined){
+    var renderer = this;
+    Game.roadSegment(start, end, function(tile){
+      renderer.drawRoad(context, tile.xy);
+    });
+  }
+
+  this.renderLayer(this.hoverSurface);
+};
+
 Diamond.prototype.colourHover = function(clear){
   if (this.inBounds(this.hover.pos)){
     if (clear){
       this.renderTile(this.hover.pos);
     }else{
       var coords = this.toScreenCoords(this.hover.pos);
-      // TODO: big images need to be shifted up
       this.context.drawImage(this.hover.image, coords[0], coords[1] + this.hover.offsetY);
     }
   }

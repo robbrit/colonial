@@ -83,8 +83,15 @@ var Game = {
     Game.buildingsToRemove.push(building);
   },
 
-  getTile: function(xy){
-    return Game.tiles[xy[1]][xy[0]];
+  getTile: function(xy, y){
+    if (y !== undefined){
+      xy = [xy, y];
+    }
+    if (Game.tiles[xy[1]]){
+      return Game.tiles[xy[1]][xy[0]];
+    }else{
+      return undefined;
+    }
   },
 
   addPerson: function(person){
@@ -93,6 +100,51 @@ var Game = {
 
   removePerson: function(person){
     Game.peopleToRemove.push(person);
+  },
+
+  roadFeasible: function(start, end){
+    return Game.roadSegment(start, end, function(tile){
+      if (tile.building || !tile.type.buildable){
+        return false;
+      }
+    });
+  },
+
+  roadSegment: function(start, end, func){
+    var yinc = start[1] > end[1] ? -1 : 1;
+
+    var tile;
+    var ret;
+    for (var i = start[1]; i != end[1]; i += yinc){
+      tile = Game.getTile(start[0], i);
+      if ((ret = func(tile)) !== undefined){
+        return ret;
+      }
+    }
+
+    if (start[0] == end[0]){
+      ret = func(Game.getTile(end));
+
+      if (ret !== undefined){
+        return ret;
+      }
+    }else if (start[0] < end[0]){
+      for (var i = start[0]; i <= end[0]; i++){
+        tile = Game.getTile(i, end[1]);
+        if ((ret = func(tile)) !== undefined){
+          return ret;
+        }
+      }
+    }else{
+      for (var i = start[0]; i >= end[0]; i--){
+        tile = Game.getTile(i, end[1]);
+        if ((ret = func(tile)) !== undefined){
+          return ret;
+        }
+      }
+    }
+
+    return true;
   },
 
   addMessage: function(msg){
@@ -111,6 +163,22 @@ var Game = {
       x = [x, y];
     }
     return this.display.tiler.inBounds(x);
+  },
+
+  pause: function(){
+    Game.state = "paused";
+  },
+
+  resume: function(){
+    Game.state = "playing";
+  },
+
+  paused: function(){
+    return Game.state == "paused";
+  },
+
+  playing: function(){
+    return Game.state == "playing";
   },
 
   tiles: false,

@@ -7,6 +7,7 @@ var Text = {
 
 Text.en = {
   corn_field: "Corn Field",
+  corn_field_body: "This is a corn field. People grow corn here.",
   destroy: "Destroy",
   housing_plot: "Housing Plot",
   inaccessible_housing: "Some housing plots are inaccessible.",
@@ -16,6 +17,7 @@ Text.en = {
   road: "Road",
   unemployment: "Unemployment",
   water_hole: "Well",
+  water_hole_body: "This is a well, where people can get water.",
   work_camp: "Work Camp"
 };
 

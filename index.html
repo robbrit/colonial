@@ -5,6 +5,13 @@
 </head>
 <body>
 <canvas id = "main-canvas"></canvas>
+
+<div id = "pane-building" class = "dialog">
+  <a class = "close-btn" href = "#" onclick = "Game.GUI.closeDialog()">X</a>
+  <h1></h1>
+  <p></p>
+</div>
+
 <div class = "sidebar">
   <div class = "toolbar">
     <a href = "#" onclick = "Game.Controls.selectBuilding('destroy'); return false" class = "building-btn">
@@ -56,10 +63,12 @@
 <script type = "text/javascript" src = "extend.js"></script>
 <script type = "text/javascript" src = "jquery-1.4.2.min.js"></script>
 <script type = "text/javascript" src = "json2.js"></script>
+<script type = "text/javascript" src = "text.js"></script>
 <script type = "text/javascript" src = "common.js"></script>
 <script type = "text/javascript" src = "buildings.js"></script>
 <script type = "text/javascript" src = "tiling.js"></script>
 <script type = "text/javascript" src = "game.js"></script>
+<script type = "text/javascript" src = "gui.js"></script>
 <script type = "text/javascript" src = "gameControls.js"></script>
 <script type = "text/javascript" src = "gameLogic.js"></script>
 <script type = "text/javascript" src = "tileTypes.js"></script>
@@ -68,7 +77,6 @@
 <script type = "text/javascript" src = "sylvester.js"></script>
 <script type = "text/javascript" src = "people.js"></script>
 <script type = "text/javascript" src = "display.js"></script>
-<script type = "text/javascript" src = "text.js"></script>
 <script type = "text/javascript">
 // init i18n stuff
 $(Text.reload);

@@ -84,6 +84,15 @@ Buildings.basic.prototype.update = function() {
     }
   }
 };
+
+Buildings.basic.prototype.getText = function(which){
+  if (which == "header"){
+    return t(this.type);
+  }else{
+    return t(this.type + "_body");
+  }
+};
+
 Buildings.basic.prototype.needsWorkers = function() { return this.workers < this.jobs; }
 
 Buildings.basic.prototype.placed = function(coords){
