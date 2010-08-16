@@ -245,7 +245,6 @@ Diamond.prototype.setCanvasSize = function(height, width){
     width = this.maxWidth;
   }
   this.canvasSize = {width: width, height: height};
-  this.element.attr("height", height).attr("width", width);
 };
 
 Diamond.prototype.scroll = function(dx, dy){
@@ -297,7 +296,7 @@ Diamond.prototype.setHoverPlots = function(start, end){
   if (!this.hoverSurface){
     this.hoverSurface = Common.createHiddenSurface(this.backgroundSize.width, this.backgroundSize.height);
   }
-  var context = this.buildingSurface.getContext("2d");
+  var context = this.hoverSurface.getContext("2d");
 
   context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 

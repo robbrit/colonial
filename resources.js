@@ -67,7 +67,40 @@ var Resources = {
     worker: {
       file: "sprites/worker.png"
     }
-  }
+  },
+
+  imagesLoading: [],
+
+  trackProgress: function(){
+    var done = true;
+    for (var i = 0; i < Resources.imagesLoading.length; i++){
+      if (!Resources.imagesLoading[i].complete){
+        done = false;
+        break;
+      }
+    }
+
+    if (done){
+      clearInterval(Resources.loadingTimer);
+      Game.doneLoading();
+    }
+  },
+
+  beginLoading: function(){
+    for (var i in TileTypes){
+      Resources.imagesLoading.push(TileTypes[i].image);
+      TileTypes[i].image.src = "images/tiles/" + TileTypes[i].file;
+    }
+    for (var i in Resources.images){
+      Resources.images[i].image = new Image();
+      Resources.imagesLoading.push(Resources.images[i].image);
+      Resources.images[i].image.src = "images/" + Resources.images[i].file;
+    }
+
+    Resources.loadingTimer = setInterval(Resources.trackProgress, 500);
+  },
+  
+  loadingTimer: false
 };
 
 Resources.sprites = {
@@ -76,13 +109,3 @@ Resources.sprites = {
   waterCarrier: Resources.images.waterCarrier,
   worker: Resources.images.worker
 };
-
-$(function(){
-  for (var i in TileTypes){
-    TileTypes[i].image.src = "images/tiles/" + TileTypes[i].file;
-  }
-  for (var i in Resources.images){
-    Resources.images[i].image = new Image();
-    Resources.images[i].image.src = "images/" + Resources.images[i].file;
-  }
-});

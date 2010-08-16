@@ -203,6 +203,13 @@ var Game = {
     return Game.state == "playing";
   },
 
+  doneLoading: function(){
+    Game.loadTiles("maps/bigmap.js");
+
+    // fire up the game engine
+    Game.intervalID = setInterval(Game.update, 33);
+  },
+
   tiles: false,
   building: false,
   state: "initializing"
@@ -216,16 +223,14 @@ Game.messages = new Array();
 
 $(function(){
   // show loading
+  $("#main-canvas")
+    .attr("width", 800)
+    .attr("height", 600);
+
   var context = $("#main-canvas").get(0).getContext("2d");
   context.fillStyle = "rgb(255, 255, 255)";
   context.strokeStyle = "rgb(0, 0, 0)";
   context.fillText("Loading...", 10, 10);
 
-  // TODO: some form of image pre-loading system instead of this silly thing
-  setTimeout(function(){
-    Game.loadTiles("maps/bigmap.js");
-
-    // fire up the game engine
-    Game.intervalID = setInterval(Game.update, 33);
-  }, 2000);
+  Resources.beginLoading();
 });

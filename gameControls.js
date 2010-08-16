@@ -60,7 +60,9 @@ Game.Controls = {
       Game.Controls.destroyAt(ev);
     }else if (Game.buildingType == "plot"){
       Game.houseBlock(Game.Controls.mouseAnchor, coords, function(tile){
-        Game.placeBuilding(tile.xy);
+        if (tile.canBuild()){
+          Game.placeBuilding(tile.xy);
+        }
       });
       Game.display.tiler.setHoverPlots();
       Game.display.tiler.renderBuildings();
@@ -72,9 +74,9 @@ Game.Controls = {
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
 
       if (Game.Controls.isMouseDown){
-        Game.display.tiler.setHoverRoad(); // clear the current road
         if (Game.roadFeasible(Game.Controls.mouseAnchor, coords)){
           // render the road
+          Game.display.tiler.setHoverRoad(); // clear the current road
           Game.display.tiler.setHover();
           Game.display.tiler.setHoverRoad(Game.Controls.mouseAnchor, coords);
         }else{
@@ -98,8 +100,8 @@ Game.Controls = {
     }else if (Game.building){
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
       if (Game.playing()){
-        var width = (Game.building == "road" ? 1 : Game.building.width);
-        var height = (Game.building == "road" ? 1 : Game.building.height);
+        var width = Game.building.width;
+        var height = Game.building.height;
 
         var canPlace = true;
         for (var y = 0; y < width; y++){
@@ -116,10 +118,13 @@ Game.Controls = {
             break;
           }
         }
-        if (canPlace){
-          Game.display.tiler.setHover(coords, Game.building);
-        }else{
-          Game.display.tiler.setHover(coords, "redHover_" + width + "_" + height);
+
+        if (!Game.Controls.isMouseDown || Game.buildingType != "plot"){
+          if (canPlace){
+            Game.display.tiler.setHover(coords, Game.building);
+          }else{
+            Game.display.tiler.setHover(coords, "redHover_" + width + "_" + height);
+          }
         }
       }
 
