@@ -161,7 +161,9 @@ Game.Controls = {
   },
 
   selectBuilding: function(what){
-    if (what == "road"){
+    if (what === false){
+      Game.building = false;
+    }else if (what == "road"){
       Game.building = Game.buildingType = "road";
     }else if (what == "destroy"){
       Game.building = Game.buildingType = "destroy";
