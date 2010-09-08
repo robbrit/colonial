@@ -53,6 +53,9 @@ var Resources = {
     shack: {
       file: "buildings/shack.png"
     },
+    silo: {
+      file: "buildings/silo.png"
+    },
 
     waterCarrier: {
       file: "sprites/watercarrier.png"

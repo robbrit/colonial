@@ -13,6 +13,7 @@ var Buildings = {
       this.isHouse = false;
       this.needsRoad = true;
       this.jobFinder = false;
+      this.yOffset = 0;
 
       this.usesLabourCamp = false;
     }
@@ -47,6 +48,7 @@ var Buildings = {
     Buildings.basic.call(this, xy, "silo");
 
     this.width = this.height = 2;
+    this.yOffset = 29;
 
     this.jobs = 10;
   },
@@ -71,6 +73,7 @@ Buildings.plot.prototype = new Buildings.basic();
 Buildings.water_hole.prototype = new Buildings.basic();
 Buildings.corn_field.prototype = new Buildings.basic();
 Buildings.work_camp.prototype = new Buildings.basic();
+Buildings.silo.prototype = new Buildings.basic();
 
 Buildings.basic.prototype.update = function() {
   // certain buildings use a job finder to find labourers,
@@ -125,6 +128,10 @@ Buildings.basic.prototype.remove = function(){
   // TODO: work camp places need to fire workers
   // TODO: Housing plots need to remove population
 };
+
+Buildings.basic.prototype.canStore = function(item){
+  return false;
+}
 
 Buildings.basic.prototype.addWorker = function(){
   this.workers++;

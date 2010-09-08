@@ -80,7 +80,7 @@ Game.Controls = {
           Game.display.tiler.setHover();
           Game.display.tiler.setHoverRoad(Game.Controls.mouseAnchor, coords);
         }else{
-          Game.display.tiler.setHover(coords, "redHover_1_1");
+          Game.display.tiler.setHover(coords, "redHover_1_1", 1);
         }
       }else{
         if (Game.inBounds(coords)){
@@ -88,7 +88,7 @@ Game.Controls = {
           if (tile.canBuild()){
             Game.display.tiler.setHover(coords, Game.building);
           }else{
-            Game.display.tiler.setHover(coords, "redHover_1_1");
+            Game.display.tiler.setHover(coords, "redHover_1_1", 1);
           }
         }
       }
@@ -123,7 +123,7 @@ Game.Controls = {
           if (canPlace){
             Game.display.tiler.setHover(coords, Game.building);
           }else{
-            Game.display.tiler.setHover(coords, "redHover_" + width + "_" + height);
+            Game.display.tiler.setHover(coords, "redHover_" + width + "_" + height, height);
           }
         }
       }

@@ -204,7 +204,7 @@ Diamond.prototype.renderBuildings = function(){
   var buildings = Game.getBuildings();
   for (var i = 0; i < buildings.length; i++){
     coords = this.toScreenCoords(buildings[i].location, false);
-    context.drawImage(buildings[i].image.image, coords[0], coords[1] - (this.jhat * (buildings[i].height - 1)));
+    context.drawImage(buildings[i].image.image, coords[0], coords[1] - (this.jhat * (buildings[i].height - 1)) - buildings[i].yOffset);
   }
 }
 
@@ -253,7 +253,10 @@ Diamond.prototype.scroll = function(dx, dy){
   this.render();
 };
 
-Diamond.prototype.setHover = function(xy, object){
+Diamond.prototype.setHover = function(xy, object, object_height){
+  if (object_height === undefined){
+    object_height = 1;
+  }
   if (this.hover.pos !== false){
     this.colourHover(true);
   }
@@ -262,9 +265,10 @@ Diamond.prototype.setHover = function(xy, object){
 
     if (typeof(object) == "string"){
       this.hover.image = Resources.images[object].image;
+      this.hover.offsetY = -this.jhat * (object_height - 1);
     }else{
       this.hover.image = object.image.image;
-      this.hover.offsetY = -this.jhat * (object.height - 1);
+      this.hover.offsetY = -this.jhat * (object.height - 1) - object.yOffset;
     }
     this.colourHover();
   }else{
