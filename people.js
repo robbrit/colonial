@@ -213,27 +213,28 @@ Wanderer.prototype.getRandomRoads = function(){
   }
 
   var path = [this.location];
+  var visited = [this.location];
   var x = this.location[0], y = this.location[1];
   for (var i = 0; i < this.wanderSize; i++){
     var next = new Array();
 
     if (x > 0 && Game.tiles[y][x - 1].road){
-      if (path.deepIndexOf([x - 1, y]) == -1){
+      if (visited.deepIndexOf([x - 1, y]) == -1){
         next.push([x - 1, y]);
       }
     }
     if (y > 0 && Game.tiles[y - 1][x].road){
-      if (path.deepIndexOf([x, y - 1]) == -1){
+      if (visited.deepIndexOf([x, y - 1]) == -1){
         next.push([x, y - 1]);
       }
     }
     if (x < Game.tiles[y].length - 1 && Game.tiles[y][x + 1].road){
-      if (path.deepIndexOf([x + 1, y]) == -1){
+      if (visited.deepIndexOf([x + 1, y]) == -1){
         next.push([x + 1, y]);
       }
     }
     if (y < Game.tiles.length - 1 && Game.tiles[y + 1][x].road){
-      if (path.deepIndexOf([x, y + 1]) == -1){
+      if (visited.deepIndexOf([x, y + 1]) == -1){
         next.push([x, y + 1]);
       }
     }
@@ -241,9 +242,12 @@ Wanderer.prototype.getRandomRoads = function(){
     if (next.length > 0){
       var nextTile = next[Math.floor(Math.random() * next.length)];
       path.push(nextTile);
+      visited.push(nextTile);
       x = nextTile[0]; y = nextTile[1];
     }else{
-      break;
+      // we're at a dead end, reset visited list
+      visited = [];
+      i--;
     }
   }
   return path;
