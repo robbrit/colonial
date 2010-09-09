@@ -100,7 +100,7 @@ Game.Controls = {
       }
     }else if (Game.building){
       var coords = Game.display.tiler.toWorldCoords(Game.canvasCoords([ev.clientX, ev.clientY]));
-      if (Game.playing()){
+      if (Game.playing() && Game.buildingType != "plot"){
         var width = Game.building.width;
         var height = Game.building.height;
 

@@ -84,6 +84,9 @@ Diamond.prototype.render = function(){
 
   // draw overlay
   this.colourHover();
+  if (this.hoverSurface){
+    this.renderLayer(this.hoverSurface);
+  }
 };
 
 Diamond.prototype.renderLayer = function(surface){
@@ -293,8 +296,6 @@ Diamond.prototype.setHoverRoad = function(start, end){
       renderer.drawRoad(context, tile.xy);
     });
   }
-
-  this.renderLayer(this.hoverSurface);
 };
 
 Diamond.prototype.setHoverPlots = function(start, end){
@@ -314,8 +315,6 @@ Diamond.prototype.setHoverPlots = function(start, end){
       }
     });
   }
-
-  this.renderLayer(this.hoverSurface);
 };
 
 Diamond.prototype.colourHover = function(clear){

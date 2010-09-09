@@ -15,6 +15,10 @@ var Resources = {
       file: "sprites/jobfinder.png"
     },
 
+    market: {
+      file: "buildings/market.png"
+    },
+
     plot: {
       file: "buildings/plot.png"
     },

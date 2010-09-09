@@ -37,6 +37,13 @@ var Buildings = {
     this.state = "working";
   },
 
+  market: function(xy){
+    Buildings.basic.call(this, xy, "market");
+
+    this.width = this.height = 2;
+
+    this.jobs = 5;
+  },
 
   plot: function(xy){
     Buildings.basic.call(this, xy, "plot");
@@ -84,6 +91,7 @@ Buildings.water_hole.prototype = new Buildings.basic();
 Buildings.corn_field.prototype = new Buildings.basic();
 Buildings.work_camp.prototype = new Buildings.basic();
 Buildings.silo.prototype = new Buildings.basic();
+Buildings.market.prototype = new Buildings.basic();
 
 Buildings.basic.prototype.update = function() {
   // certain buildings use a job finder to find labourers,
