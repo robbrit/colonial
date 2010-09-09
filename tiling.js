@@ -201,10 +201,9 @@ Diamond.prototype.renderBuildings = function(){
 
   var coords;
 
-  var buildings = Game.getBuildings();
+  var buildings = Game.getBuildingsByZOrder();
   for (var i = 0; i < buildings.length; i++){
-    coords = this.toScreenCoords(buildings[i].location, false);
-    context.drawImage(buildings[i].image.image, coords[0], coords[1] - (this.jhat * (buildings[i].height - 1)) - buildings[i].yOffset);
+    buildings[i].render(this, context);
   }
 }
 
@@ -285,6 +284,8 @@ Diamond.prototype.setHoverRoad = function(start, end){
   var context = this.buildingSurface.getContext("2d");
 
   context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+
+  this.renderBuildings();
 
   if (start !== undefined && end !== undefined){
     var renderer = this;

@@ -56,6 +56,7 @@ Game.Controls = {
     if (Game.building == "road"){
       Game.display.tiler.setHoverRoad();
       Game.Controls.placeRoad(Game.Controls.mouseAnchor, coords);
+      Game.display.tiler.renderBuildings();
     }else if (Game.building == "destroy"){
       Game.Controls.destroyAt(ev);
     }else if (Game.buildingType == "plot"){

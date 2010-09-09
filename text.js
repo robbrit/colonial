@@ -17,6 +17,8 @@ Text.en = {
   plot_too_far: "Some housing plots are too far from a road.",
   population: "Population",
   road: "Road",
+  silo: "Silo",
+  silo_body: "Silos are used to store food.",
   unemployment: "Unemployment",
   water_hole: "Well",
   water_hole_body: "This is a well, where people can get water.",
@@ -35,6 +37,8 @@ Text.fr = {
   plot_too_far: "Il y a des logements qui ne sont pas adjacent à une rue.",
   population: "Population",
   road: "Rue",
+  silo: "Silo",
+  silo_body: "Silos are used to store food.",
   unemployment: "Chômage",
   water_hole: "Fontaine",
   work_camp: "Camp de Travail"

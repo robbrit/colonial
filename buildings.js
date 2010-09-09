@@ -25,10 +25,16 @@ var Buildings = {
     this.width = this.height = 3;
 
     this.production = 0;
-    this.totalProduction = 10000;
+    this.totalProduction = 1000;
     this.jobs = 1;
     this.workersHere = [];
     this.usesLabourCamp = true;
+
+    this.goodsAtProduction = {
+      corn: 10
+    };
+
+    this.state = "working";
   },
 
 
@@ -49,6 +55,10 @@ var Buildings = {
 
     this.width = this.height = 2;
     this.yOffset = 29;
+
+    this.capacity = 100;
+    this.pendingCapacity = 0; // for stuff on its way
+    this.contents = {};
 
     this.jobs = 10;
   },
@@ -94,6 +104,12 @@ Buildings.basic.prototype.getText = function(which){
   }else{
     return t(this.type + "_body");
   }
+};
+
+// overridden for custom building rendering
+Buildings.basic.prototype.render = function(tiler, context){
+  coords = tiler.toScreenCoords(this.location, false);
+  context.drawImage(this.image.image, coords[0], coords[1] - (tiler.jhat * (this.height - 1)) - this.yOffset);
 };
 
 Buildings.basic.prototype.needsWorkers = function() { return this.workers < this.jobs; }
@@ -273,15 +289,19 @@ Buildings.work_camp.prototype.update = function(){
 
       if (building.usesLabourCamp && building.needsWorkers()){
         // send a worker to this building
-        // TODO: make the worker follow a road
         var worker = idleWorkers.shift();
 
-        worker.assignWorkplace(building);
-        building.addWorker();
+        // not sure why this is ever undefined, but it is sometimes
+        if (worker){
+          worker.assignWorkplace(building);
+          building.addWorker();
 
-        worker.location = this.location;
-        worker.moveToBuilding(building);
-        Game.addPerson(worker);
+          var road = this.findRoad(1);
+
+          Game.addPerson(worker);
+          worker.location = road.xy;
+          worker.moveToBuildingByRoad(building);
+        }
       }
     }
   }
@@ -301,18 +321,86 @@ Buildings.work_camp.prototype.idleWorkers = function(){
  *****************************/
 Buildings.corn_field.prototype.workerArrived = function(who){
   this.workersHere.push(who);
+  this.whileInside(who);
 };
 
 Buildings.corn_field.prototype.update = function(){
   Buildings.basic.prototype.update.call(this);
 
-  if (this.workersHere.length > 0){
-    this.production++;
+  if (this.state == "working"){
+    if (this.workersHere.length > 0){
+      this.production++;
 
-    if (this.production >= this.totalProduction){
-      this.production = 0;
+      if (this.production >= this.totalProduction){
+        this.production = this.totalProduction;
 
-      // TODO: send the worker to a silo
+        var farm = this;
+        var silo = Game.findBuilding("silo", function(silo){
+          return silo.hasRoom(farm.goodsAtProduction.corn);
+        });
+
+        if (silo){
+          // send the worker to this silo
+          this.workersHere[0].transportGoodsTo(this.goodsAtProduction, silo);
+          this.state = "waiting";
+          this.production = 0;
+        }
+      }
     }
+  }else{
+    // do nothing
+  }
+};
+
+Buildings.corn_field.prototype.whileInside = function(worker){
+  // TODO: make the worker wander around, show farming animation
+};
+
+Buildings.corn_field.prototype.getText = function(which){
+  var base = Buildings.basic.prototype.getText.call(this, which);
+  
+  if (which == "body"){
+    return base +
+      "<br /><br />" +
+      "Production is at " + Math.round(this.production / this.totalProduction * 100) + "%.";
+  }else{
+    return base;
+  }
+};
+
+/*****************************
+ *        Silo Methods       *
+ *****************************/
+Buildings.silo.prototype.hasRoom = function(amount){
+  var total = this.pendingCapacity + amount;
+
+  for (var type in this.contents){
+    total += this.contents[type];
+  }
+
+  return total <= this.capacity;
+};
+
+Buildings.silo.prototype.addGoods = function(what){
+  for (var type in what){
+    if (this.contents[type] === undefined){
+      this.contents[type] = 0;
+    }
+    this.contents[type] += what[type];
+  }
+}
+
+Buildings.silo.prototype.getText = function(which){
+  var base = Buildings.basic.prototype.getText.call(this, which);
+  
+  if (which == "body"){
+    base +=
+      "<br /><br />";
+
+    for (var crop in this.contents){
+      base += crop.capitalize() + ": " + this.contents[crop] + "<br />";
+    }
+  }else{
+    return base;
   }
 };

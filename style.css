@@ -23,6 +23,8 @@ canvas {
   height: 200px;
 }
 
+.clear { clear: both; }
+
 a img{
   border: none;
 }

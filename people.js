@@ -66,10 +66,10 @@ Person.prototype.arrived = function(){
   this.setNewTarget(false);
 };
 
-Person.prototype.moveToBuilding = function(target){
+Person.prototype._moveToBuilding = function(target, pathfinder){
   this.targetTile = target;
 
-  this.targetQueue = AI.GlobalAStar(this, this.location, target.xy || target.location);
+  this.targetQueue = pathfinder(this, this.location, target.xy || target.location);
 
   if (this.targetQueue){
     this.targetQueue.shift(); // A* includes the start
@@ -77,7 +77,22 @@ Person.prototype.moveToBuilding = function(target){
   }else{
     // no path!
   }
+}
+
+Person.prototype.moveToBuilding = function(target){
+  this._moveToBuilding(target, AI.GlobalAStar);
 };
+
+Person.prototype.moveToBuildingByRoad = function(target){
+  var road = target.findRoad(1);
+
+  // odd chance we might start where we are going
+  if (road.xy[0] != this.location[0] || road.xy[0] != this.location[1]){
+    this._moveToBuilding(road, AI.RoadAStar);
+  }else{
+    this.setNewTarget([this.location]);
+  }
+}
 
 Person.prototype.setNewTarget = function(target){
   if (target){
@@ -350,8 +365,42 @@ Worker.prototype.isWorking = function() { return this.working; }
 Worker.prototype.assignWorkplace = function(building){
   this.working = true;
   this.workplace = building;
+  this.state = "on_road";
 };
 
 Worker.prototype.update = function(){
   Person.prototype.update.call(this);
 };
+
+Worker.prototype.transportGoodsTo = function(goods, building){
+  this.state = "transporting";
+  this.dropSpot = building;
+  this.goods = goods;
+
+  this.location = this.workplace.findRoad(1).xy;
+  this.moveToBuildingByRoad(building);
+};
+
+Worker.prototype.arrived = function(){
+  if (this.state == "on_road"){
+    // arrived from road, move onto building
+    this.moveToBuilding(this.workplace);
+    this.state = "entering";
+  }else if (this.state == "entering"){
+    Person.prototype.arrived.call(this);
+    this.state = "inside";
+    this.workplace.workerArrived(this);
+  }else if (this.state == "inside"){
+    this.workplace.whileInside(this);
+  }else if (this.state == "transporting"){
+    // arrived at silo
+    this.dropSpot.addGoods(this.goods);
+    this.goods = false;
+    this.state = "returning";
+    this.moveToBuildingByRoad(this.workplace);
+  }else if (this.state == "returning"){
+    this.moveToBuilding(this.workplace);
+    this.state = "entering";
+    this.workplace.state = "working";
+  }
+}

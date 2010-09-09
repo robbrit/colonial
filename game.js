@@ -79,6 +79,25 @@ var Game = {
     return Game.buildings;
   },
 
+  getBuildingsByZOrder: function(){
+    return Game.buildings.sort(function(a, b){
+      return (b.location[0] + Game.tiles.length - b.location[1] - 1) -
+        (a.location[0] + Game.tiles.length - a.location[1] - 1);
+    });
+  },
+
+  findBuilding: function(type, criterion){
+    var building;
+    for (var i = 0; i < Game.buildings.length; i++){
+      building = Game.buildings[i];
+
+      if (building.type == type && (criterion === undefined || criterion(building))){
+        return building;
+      }
+    }
+    return false;
+  },
+
   removeBuilding: function(building){
     Game.buildingsToRemove.push(building);
   },
