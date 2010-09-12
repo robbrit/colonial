@@ -129,9 +129,13 @@ Game.Controls = {
         }
       }
 
-      if (Game.Controls.isMouseDown && Game.buildingType == "plot"){
-        Game.display.tiler.setHover();
-        Game.display.tiler.setHoverPlots(Game.Controls.mouseAnchor, coords);
+      if (Game.buildingType == "plot"){
+        if (Game.Controls.isMouseDown){
+          Game.display.tiler.setHover();
+          Game.display.tiler.setHoverPlots(Game.Controls.mouseAnchor, coords);
+        }else{
+          Game.display.tiler.setHover(coords, Game.building);
+        }
       }
     }
   },

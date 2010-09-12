@@ -288,6 +288,7 @@ Immigrant.prototype.update = function(){
       if (this.targetQueue.length == 0){
         // TODO: check to see if the building is still here
         this.targetTile.building.arrived(this);
+        this.arrived();
         Game.removePerson(this);
       }else{
         this.location = this.target.elements;
@@ -298,6 +299,12 @@ Immigrant.prototype.update = function(){
       this.move();
     }
   }
+};
+
+Immigrant.prototype.arrived = function(){
+  Person.prototype.arrived.call(this);
+
+  GameLogic.immigrantArrived(this);
 };
 
 function JobFinder(start, building){

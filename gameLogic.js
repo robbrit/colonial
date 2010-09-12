@@ -1,7 +1,6 @@
 var GameLogic = {
   createImmigrant: function(target){
     var immigrant = new Immigrant([0, 0], target);
-    GameLogic.population++;
     Game.addPerson(immigrant);
     target.building.addPerson(immigrant);
   },
@@ -9,6 +8,10 @@ var GameLogic = {
   addPerson: function(person){
     // people added this way don't count toward population
     Game.addPerson(person);
+  },
+
+  immigrantArrived: function(person){
+    GameLogic.population++;
   },
   
   update: function(dt){
@@ -57,7 +60,7 @@ var GameLogic = {
     },
     function(dt) {
       // compute info variables
-      $("#info-population").html(GameLogic.population);
+      $("#info-population").html(Math.round(GameLogic.population * GameLogic.employablePct));
 
       if (GameLogic.population > 0){
         $("#info-unemployment").html(Math.round(100 - GameLogic.employed / GameLogic.population * 100) + "%");
@@ -72,3 +75,4 @@ var GameLogic = {
 GameLogic.population = 0;
 GameLogic.employed = 0;
 GameLogic.updateNo = 0;
+GameLogic.employablePct = 1; // TODO: change job-seeker behaviour to take this into account
