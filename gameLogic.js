@@ -46,15 +46,16 @@ var GameLogic = {
       // count available housing
       var available = false;
       for (var i = 0; i < Game.buildings.length; i++){
-        if (Game.buildings[i].getCapacity !== undefined && Game.buildings[i].getCapacity() > 0){
+        // TODO: separate housing from other buildings
+        // if the building has capacity and a certain probability is hit, then create an immigrant
+        // for this building
+        if (Game.buildings[i].getCapacity() > 0 && Math.random() < GameLogic.immigrantProbability){
           available = Game.buildings[i].location;
           available = Game.tiles[available[1]][available[0]];
-          break;
         }
       }
 
-      if (available !== false && Math.random() < 0.05){
-        // On a 5% probability, create an immigrant
+      if (available !== false){
         GameLogic.createImmigrant(available);
       }
     },
@@ -76,3 +77,4 @@ GameLogic.population = 0;
 GameLogic.employed = 0;
 GameLogic.updateNo = 0;
 GameLogic.employablePct = 1; // TODO: change job-seeker behaviour to take this into account
+GameLogic.immigrantProbability = 0.01;

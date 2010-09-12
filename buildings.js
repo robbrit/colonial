@@ -106,6 +106,8 @@ Buildings.basic.prototype.update = function() {
   }
 };
 
+Buildings.basic.prototype.getCapacity = function() { return 0; }
+
 Buildings.basic.prototype.getText = function(which){
   if (which == "header"){
     return t(this.type);
