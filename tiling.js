@@ -20,6 +20,9 @@ function Diamond(tiles, element){
   this.tiles = tiles;
   this.element = $(element);
 
+  // queue building rendering so that it only happens once per cycle
+  this.buildingRenderQueued = false;
+
   // this provides the basis for our isometric layout
   this.jhat = Math.floor(tiles[0][0].image.height / 2);
   this.ihat = tiles[0][0].image.width / 2;
@@ -56,11 +59,15 @@ function Diamond(tiles, element){
   // a surface to contain the terrain information
   this.renderTerrain();
   this.renderRoads();
-  this.renderBuildings();
+  this._renderBuildings();
 }
 
 Diamond.prototype.render = function(){
   this.context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+
+  if (this.buildingRenderQueued){
+    this._renderBuildings();
+  }
 
   //pass 1 - draw terrain, roads and buildings
   this.renderLayer(this.terrainSurface);
@@ -195,6 +202,10 @@ Diamond.prototype.drawRoad = function(context, x, y){
 };
 
 Diamond.prototype.renderBuildings = function(){
+  this.buildingRenderQueued = true;
+};
+
+Diamond.prototype._renderBuildings = function(){
   if (!this.buildingSurface){
     this.buildingSurface = Common.createHiddenSurface(this.backgroundSize.width, this.backgroundSize.height);
   }
@@ -208,6 +219,7 @@ Diamond.prototype.renderBuildings = function(){
   for (var i = 0; i < buildings.length; i++){
     buildings[i].render(this, context);
   }
+  this.buildingRenderQueued = false;
 }
 
 Diamond.prototype.toWorldCoords = function(xy){
@@ -288,7 +300,7 @@ Diamond.prototype.setHoverRoad = function(start, end){
 
   context.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
 
-  this.renderBuildings();
+  this._renderBuildings();
 
   if (start !== undefined && end !== undefined){
     var renderer = this;

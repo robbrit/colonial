@@ -134,7 +134,8 @@ var Game = {
 
     var tile;
     var ret;
-    for (var i = start[1]; i != end[1]; i += yinc){
+    // first go along the y-axis
+    for (var i = start[1]; i != end[1] + yinc; i += yinc){
       tile = Game.getTile(start[0], i);
       if ((ret = func(tile)) !== undefined){
         return ret;
@@ -142,20 +143,19 @@ var Game = {
     }
 
     if (start[0] == end[0]){
-      ret = func(Game.getTile(end));
-
-      if (ret !== undefined){
-        return ret;
-      }
+      // if the x's are equal, then we have nothing
+      // to do except the end tile
     }else if (start[0] < end[0]){
-      for (var i = start[0]; i <= end[0]; i++){
+      // start is further to the left than the end
+      for (var i = start[0] + 1; i <= end[0]; i++){
         tile = Game.getTile(i, end[1]);
         if ((ret = func(tile)) !== undefined){
           return ret;
         }
       }
     }else{
-      for (var i = start[0]; i >= end[0]; i--){
+      // start is further to the right than the end
+      for (var i = start[0] - 1; i >= end[0]; i--){
         tile = Game.getTile(i, end[1]);
         if ((ret = func(tile)) !== undefined){
           return ret;
