@@ -130,7 +130,8 @@ var Game = {
   },
 
   roadSegment: function(start, end, func){
-    var yinc = start[1] > end[1] ? -1 : 1;
+    var xinc = start[0] > end[0] ? (start[0] == end[0] ? 0 : -1) : 1;
+    var yinc = start[1] > end[1] ? (start[1] == end[1] ? 0 : -1) : 1;
 
     var tile;
     var ret;
@@ -142,20 +143,10 @@ var Game = {
       }
     }
 
-    if (start[0] == end[0]){
-      // if the x's are equal, then we have nothing
-      // to do except the end tile
-    }else if (start[0] < end[0]){
-      // start is further to the left than the end
-      for (var i = start[0] + 1; i <= end[0]; i++){
-        tile = Game.getTile(i, end[1]);
-        if ((ret = func(tile)) !== undefined){
-          return ret;
-        }
-      }
+    if (xinc == 0){
+      // if the x's are equal, then we have nothing to do
     }else{
-      // start is further to the right than the end
-      for (var i = start[0] - 1; i >= end[0]; i--){
+      for (var i = start[0] + xinc; i != end[0] + xinc; i += xinc){
         tile = Game.getTile(i, end[1]);
         if ((ret = func(tile)) !== undefined){
           return ret;

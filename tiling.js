@@ -173,30 +173,38 @@ Diamond.prototype.renderRoads = function(){
   for (var y = 0; y < this.tiles.length; y++){
     for (var x = 0; x < this.tiles[y].length; x++){
       if (this.tiles[y][x].road){
-        this.drawRoad(context, x, y);
+        this.drawRoad(context, [x, y]);
       }
     }
   }
 };
 
-Diamond.prototype.drawRoad = function(context, x, y){
-  if (y === undefined){
-    y = x[1];
-    x = x[0];
+Diamond.prototype.drawRoad = function(context, xy){
+  var y = xy[1];
+  var x = xy[0];
+
+  // grab nearby tiles to see if we need to render extra roads
+  var nearby = {
+    left:   (x > 0 ? this.tiles[y][x - 1].road || this.isHoverRoad(x - 1, y) : false),
+    right:  ((y > 0 && y < this.tiles.length && x < this.tiles[y].length - 1) ?
+              this.tiles[y][x + 1].road || this.isHoverRoad(x + 1, y) : false),
+    top:    (y > 0 ? this.tiles[y - 1][x].road || this.isHoverRoad(x, y - 1) : false),
+    bottom: (y < this.tiles.length - 1 ? this.tiles[y + 1][x].road || this.isHoverRoad(x, y + 1) : false),
   }
   var coords = this.toScreenCoords([x, y], false);
+
   context.drawImage(Resources.images.road.image, coords[0], coords[1]);
 
-  if (x > 0 && this.tiles[y][x - 1].road){
+  if (nearby.left){
     context.drawImage(Resources.images.road_bl.image, coords[0], coords[1]);
   }
-  if (y > 0 && this.tiles[y - 1][x].road){
+  if (nearby.top){
     context.drawImage(Resources.images.road_tl.image, coords[0], coords[1]);
   }
-  if (x < this.tiles[y].length - 1 && this.tiles[y][x + 1].road){
+  if (nearby.right){
     context.drawImage(Resources.images.road_tr.image, coords[0], coords[1]);
   }
-  if (y < this.tiles.length - 1 && this.tiles[y + 1][x].road){
+  if (nearby.bottom){
     context.drawImage(Resources.images.road_br.image, coords[0], coords[1]);
   }
 };
@@ -303,11 +311,32 @@ Diamond.prototype.setHoverRoad = function(start, end){
   this._renderBuildings();
 
   if (start !== undefined && end !== undefined){
+    this.hoverRoad = { start: start, end: end };
+
     var renderer = this;
-    Game.roadSegment(start, end, function(tile){
-      renderer.drawRoad(context, tile.xy);
+
+    this.renderRoads();
+    Game.roadSegment(start, end, function(tile, nearby){
+      renderer.drawRoad(context, tile.xy, nearby);
     });
+  }else{
+    this.hoverRoad = false;
   }
+};
+
+Diamond.prototype.isHoverRoad = function(x, y){
+  if (this.hoverRoad === false){
+    return false;
+  }
+
+  var lowerY = Math.min(this.hoverRoad.start[1], this.hoverRoad.end[1]);
+  var higherY = Math.max(this.hoverRoad.start[1], this.hoverRoad.end[1]);
+  var lowerX = Math.min(this.hoverRoad.start[0], this.hoverRoad.end[0]);
+  var higherX = Math.max(this.hoverRoad.start[0], this.hoverRoad.end[0]);
+
+
+  return (x == this.hoverRoad.start[0] && y <= higherY && y >= lowerY) ||
+    (y == this.hoverRoad.end[1] && x <= higherX && x >= lowerX);
 };
 
 Diamond.prototype.setHoverPlots = function(start, end){
