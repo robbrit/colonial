@@ -43,6 +43,10 @@ Person.prototype.findHouses = function(radius, multiple){
   }
 };
 
+Person.prototype.setSprite = function(sprite){
+  this.sprite = sprite;
+};
+
 Person.prototype.getLocation = function(){
   return [
     this.location[0] + this.offset.elements[0],
@@ -366,7 +370,7 @@ Worker.prototype.isWorking = function() { return this.working; }
 Worker.prototype.assignWorkplace = function(building){
   this.working = true;
   this.workplace = building;
-  this.state = "on_road";
+  this.setState("on_road");
 };
 
 Worker.prototype.update = function(){
@@ -374,7 +378,7 @@ Worker.prototype.update = function(){
 };
 
 Worker.prototype.transportGoodsTo = function(goods, building){
-  this.state = "transporting";
+  this.setState("transporting");
   this.dropSpot = building;
   this.goods = goods;
 
@@ -386,10 +390,10 @@ Worker.prototype.arrived = function(){
   if (this.state == "on_road"){
     // arrived from road, move onto building
     this.moveToBuilding(this.workplace);
-    this.state = "entering";
+    this.setState("entering");
   }else if (this.state == "entering"){
     Person.prototype.arrived.call(this);
-    this.state = "inside";
+    this.setState("inside");
     this.workplace.workerArrived(this);
   }else if (this.state == "inside"){
     this.workplace.whileInside(this);
@@ -397,11 +401,17 @@ Worker.prototype.arrived = function(){
     // arrived at silo
     this.dropSpot.addGoods(this.goods);
     this.goods = false;
-    this.state = "returning";
+    this.setState("returning");
     this.moveToBuildingByRoad(this.workplace);
   }else if (this.state == "returning"){
     this.moveToBuilding(this.workplace);
-    this.state = "entering";
+    this.setState("entering");
     this.workplace.state = "working";
   }
+
+}
+
+Worker.prototype.setState = function(state){
+  this.state = state;
+  this.setSprite(this.workplace.getWorkerSprite(this.state));
 }

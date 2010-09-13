@@ -96,7 +96,7 @@ Buildings.market.prototype = new Buildings.basic();
 Buildings.basic.prototype.update = function() {
   // certain buildings use a job finder to find labourers,
   // so send one out if we need workers
-  if (this.usesLabourCamp === false && this.needsWorkers() && this.jobFinder === false){
+  if (GameLogic.population > 0 && this.usesLabourCamp === false && this.needsWorkers() && this.jobFinder === false){
     var road = this.findRoad(1);
 
     if (road){
@@ -341,21 +341,28 @@ Buildings.corn_field.prototype.update = function(){
     if (this.workersHere.length > 0){
       this.production++;
 
+      var pct = this.getProductionPct();
+      if (pct >= 100 && pct % 10 == 0){
+        Game.display.tiler.renderBuildings();
+      }
+
       if (this.production >= this.totalProduction){
         this.production = this.totalProduction;
-
-        var farm = this;
-        var silo = Game.findBuilding("silo", function(silo){
-          return silo.hasRoom(farm.goodsAtProduction.corn);
-        });
-
-        if (silo){
-          // send the worker to this silo
-          this.workersHere[0].transportGoodsTo(this.goodsAtProduction, silo);
-          this.state = "waiting";
-          this.production = 0;
-        }
+        this.state = "production_done";
       }
+    }
+  }else if (this.state == "production_done"){
+    var farm = this;
+    var silo = Game.findBuilding("silo", function(silo){
+      return silo.hasRoom(farm.goodsAtProduction.corn);
+    });
+
+    if (silo){
+      // send the worker to this silo
+      this.production = 0;
+      this.workersHere[0].transportGoodsTo(this.goodsAtProduction, silo);
+      this.state = "waiting";
+      Game.display.tiler.renderBuildings();
     }
   }else{
     // do nothing
@@ -372,11 +379,68 @@ Buildings.corn_field.prototype.getText = function(which){
   if (which == "body"){
     return base +
       "<br /><br />" +
-      "Production is at " + Math.round(this.production / this.totalProduction * 100) + "%.";
+      "Production is at " + this.getProductionPct() + "%.";
   }else{
     return base;
   }
 };
+
+Buildings.corn_field.prototype.getProductionPct = function(){
+  return Math.round(this.production / this.totalProduction * 100);
+};
+
+Buildings.corn_field.prototype.getWorkerSprite = function(workerState){
+  if (workerState == "inside"){
+    return Resources.sprites.worker_farming;
+  }else{
+    return Resources.sprites.worker;
+  }
+};
+
+Buildings.corn_field.prototype.render = function(tiler, context){
+  Buildings.basic.prototype.render.call(this, tiler, context);
+
+  var pct = this.getProductionPct();
+  var corn = Resources.images.corn;
+  var coords;
+
+  if (pct > 10){
+    coords = tiler.toScreenCoords(this.location, false);
+    context.drawImage(corn.image, coords[0], coords[1]);
+  }
+  if (pct > 20){
+    coords = tiler.toScreenCoords([this.location[0] + 1, this.location[1]], false);
+    context.drawImage(corn.image, coords[0] + 1, coords[1]);
+  }
+  if (pct > 30){
+    coords = tiler.toScreenCoords([this.location[0] + 2, this.location[1]], false);
+    context.drawImage(corn.image, coords[0] + 2, coords[1]);
+  }
+  if (pct > 40){
+    coords = tiler.toScreenCoords([this.location[0], this.location[1] + 1], false);
+    context.drawImage(corn.image, coords[0], coords[1] + 1);
+  }
+  if (pct > 50){
+    coords = tiler.toScreenCoords([this.location[0] + 1, this.location[1] + 1], false);
+    context.drawImage(corn.image, coords[0] + 1, coords[1] + 1);
+  }
+  if (pct > 60){
+    coords = tiler.toScreenCoords([this.location[0] + 2, this.location[1] + 1], false);
+    context.drawImage(corn.image, coords[0] + 2, coords[1] + 1);
+  }
+  if (pct > 70){
+    coords = tiler.toScreenCoords([this.location[0], this.location[1] + 2], false);
+    context.drawImage(corn.image, coords[0], coords[1] + 2);
+  }
+  if (pct > 80){
+    coords = tiler.toScreenCoords([this.location[0] + 1, this.location[1] + 2], false);
+    context.drawImage(corn.image, coords[0] + 1, coords[1] + 2);
+  }
+  if (pct > 90){
+    coords = tiler.toScreenCoords([this.location[0] + 2, this.location[1] + 2], false);
+    context.drawImage(corn.image, coords[0] + 2, coords[1] + 2);
+  }
+}
 
 /*****************************
  *        Silo Methods       *

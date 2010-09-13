@@ -1,5 +1,8 @@
 var Resources = {
   images: {
+    corn: {
+      file: "resources/corn.png"
+    },
     corn_field: {
       file: "buildings/corn-field.png"
     },
@@ -73,6 +76,9 @@ var Resources = {
     },
     worker: {
       file: "sprites/worker.png"
+    },
+    worker_farming: {
+      file: "sprites/worker-farming.png"
     }
   },
 
@@ -114,5 +120,6 @@ Resources.sprites = {
   immigrant: Resources.images.immigrant,
   jobFinder: Resources.images.jobFinder,
   waterCarrier: Resources.images.waterCarrier,
-  worker: Resources.images.worker
+  worker: Resources.images.worker,
+  worker_farming: Resources.images.worker_farming
 };
