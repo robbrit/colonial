@@ -1,6 +1,10 @@
 var Text = {
   getText: function(label){
-    return Text[Text.lang][label];
+    if (!Text[Text.lang][label]){
+      return "";
+    }else{
+      return Text[Text.lang][label];
+    }
   },
   lang: "en"
 };
@@ -9,8 +13,13 @@ Text.en = {
   corn_field: "Corn Field",
   corn_field_body: "This is a corn field. People grow corn here.",
   destroy: "Destroy",
+  house_level_0: "This house has nobody here. It is just an empty plot.",
+  house_level_1: "This house needs water to upgrade.",
+  house_level_2: "This house has water, but still needs some food to upgrade.",
+  house_level_3: "This house has food and water.",
   housing_plot: "Housing Plot",
   inaccessible_housing: "Some housing plots are inaccessible.",
+  market: "Market",
   must_be_near_road: "This building must be adjacent to a road.",
   plot: "Housing Plot",
   plot_body: "",
@@ -29,8 +38,13 @@ Text.fr = {
   corn_field: "Champ de Maïs",
   corn_field_body: "C'est un champ de maïs.",
   destroy: "Détruire",
+  house_level_0: "This house has nobody here. It is just an empty plot.",
+  house_level_1: "This house needs water to upgrade.",
+  house_level_2: "This house has water, but still needs some food to upgrade.",
+  house_level_3: "This house has food and water.",
   housing_plot: "Logement",
   inaccessible_housing: "Il y a des logements qui sont inaccessible.",
+  market: "Marché",
   must_be_near_road: "Cet édifice doit être adjacent à une rue.",
   plot: "Logement",
   plot_body: "",

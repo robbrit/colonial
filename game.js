@@ -174,9 +174,11 @@ var Game = {
   },
 
   placeBuilding: function(coords){
-    Game.building.placed(coords);
-    Game.buildings.push(Game.building);
-    Game.building = new Buildings[Game.buildingType]();
+    if (Game.building !== false){
+      Game.building.placed(coords);
+      Game.buildings.push(Game.building);
+      Game.building = new Buildings[Game.buildingType]();
+    }
   },
 
   addMessage: function(msg){

@@ -9,6 +9,10 @@ var Resources = {
     hovel: {
       file: "buildings/hovel.png"
     },
+    hut: {
+      file: "buildings/hut.png",
+      yOffset: 3
+    },
 
     immigrant: {
       file: "sprites/immigrant.png"
@@ -22,9 +26,8 @@ var Resources = {
       file: "buildings/market.png"
     },
 
-    plot: {
-      file: "buildings/plot.png"
-    },
+    merchant: { file: "sprites/merchant.png" },
+    plot: { file: "buildings/plot.png" },
 
     // TODO: The red hovers should be handled better
     redHover_1_1: {
@@ -119,6 +122,7 @@ var Resources = {
 Resources.sprites = {
   immigrant: Resources.images.immigrant,
   jobFinder: Resources.images.jobFinder,
+  merchant: Resources.images.merchant,
   waterCarrier: Resources.images.waterCarrier,
   worker: Resources.images.worker,
   worker_farming: Resources.images.worker_farming

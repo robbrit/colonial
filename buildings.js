@@ -31,7 +31,7 @@ var Buildings = {
     this.usesLabourCamp = true;
 
     this.goodsAtProduction = {
-      corn: 10
+      corn: 50
     };
 
     this.state = "working";
@@ -43,6 +43,12 @@ var Buildings = {
     this.width = this.height = 2;
 
     this.jobs = 5;
+    this.merchant = false;
+    this.state = "merchant_here";
+
+    this.contents = {
+      corn: 0
+    };
   },
 
   plot: function(xy){
@@ -54,7 +60,10 @@ var Buildings = {
     this.isHouse = true;
 
     this.level = 0;
-    this.needs = {};
+    this.needs = {
+      water: false,
+      corn: 0
+    };
   },
 
   silo: function(xy){
@@ -63,9 +72,11 @@ var Buildings = {
     this.width = this.height = 2;
     this.yOffset = 29;
 
-    this.capacity = 100;
+    this.capacity = 1000;
     this.pendingCapacity = 0; // for stuff on its way
-    this.contents = {};
+    this.contents = {
+      corn: 0
+    };
 
     this.jobs = 10;
   },
@@ -75,6 +86,7 @@ var Buildings = {
     this.width = this.height = 2;
 
     this.carrier = false;
+    this.state = "carrier_here";
     this.jobs = 2;
   },
 
@@ -84,6 +96,7 @@ var Buildings = {
 
     this.jobs = 10;
     this.workerObjs = new Array();
+    this.lastWorkerSent = 0;
   }
 };
 Buildings.plot.prototype = new Buildings.basic();
@@ -187,20 +200,28 @@ Buildings.basic.prototype.findRoad = function(radius, width, height){
  * Plot Methods *
  ****************/
 Buildings.plot.capacities = [
-  1, 1, 2
+  1, 1, 2, 3
 ];
 Buildings.plot.prototype.update = function(){
   if (this.people === 0){
     this.level = 0;
   }else{
-    if (this.needs["water"] === true){
-      if (this.level < 2){
-        // promote us to level 2
+    if (this.level == 0){
+      this.level = 1;
+    }else if (this.level == 1){
+      if (this.needs.water === true){
         this.level = 2;
       }
-    }else{
-      // demote us to level 1
-      this.level = 1;
+    }else if (this.level == 2){
+      if (this.needs.water === false){
+        this.level = 1;
+      }else if (this.needs.corn > 0){
+        this.level = 3;
+      }
+    }else if (this.level == 3){
+      if (this.needs.corn === 0){
+        this.level = 2;
+      }
     }
   }
   this.capacity = Buildings.plot.capacities[this.level];
@@ -238,6 +259,7 @@ Buildings.plot.prototype.getCapacity = function(person){
 
 Buildings.plot.prototype.updateImage = function(){
   var lastImage = this.image;
+  this.yOffset = 0;
 
   if (this.level === 0){
     this.image = Resources.images.plot;
@@ -245,6 +267,9 @@ Buildings.plot.prototype.updateImage = function(){
     this.image = Resources.images.hovel;
   }else if (this.level == 2){
     this.image = Resources.images.shack;
+  }else if (this.level == 3){
+    this.yOffset = Resources.images.hut.yOffset;
+    this.image = Resources.images.hut;
   }
 
   if (this.image != lastImage){
@@ -266,6 +291,16 @@ Buildings.plot.prototype.addResource = function(resource, amount){
   }
 };
 
+Buildings.plot.prototype.getText = function(which){
+  var base = Buildings.basic.prototype.getText.call(this, which);
+  
+  if (which == "body"){
+    base += "<br /><br />" + t("house_level_" + this.level);
+  }
+
+  return base;
+};
+
 /*************************
  * Watering Hole Methods *
  *************************/
@@ -273,13 +308,17 @@ Buildings.water_hole.prototype.update = function(){
   Buildings.basic.prototype.update.call(this);
 
   // if we have any workers we should put out a water carrier
-  if (this.workers > 0 && !this.carrier){
-    var road = this.findRoad(1);
+  if (this.workers > 0){
+    if (this.state == "carrier_here"){
+      var road = this.findRoad(1);
 
-    // should randomly place water carrier based on how well-staffed we are
-    if (road){
-      this.carrier = new WaterCarrier(road.xy, this);
-      GameLogic.addPerson(this.carrier);
+      // TODO: should randomly place water carrier based on how well-staffed we are
+      if (road){
+        if (!this.carrier){
+          this.carrier = new WaterCarrier(road.xy, this);
+          GameLogic.addPerson(this.carrier);
+        }
+      }
     }
   }
 };
@@ -291,29 +330,36 @@ Buildings.work_camp.prototype.update = function(){
   Buildings.basic.prototype.update.call(this);
 
   // if we have any workers look for places that need work
-  var idleWorkers = this.idleWorkers();
-  if (idleWorkers.length > 0){
-    // Might need to iterate over non-housing buildings
-    for (var i = 0; i < Game.buildings.length; i++){
-      var building = Game.buildings[i];
+  if (this.lastWorkerSent <= 0){
+    var idleWorkers = this.idleWorkers();
+    if (idleWorkers.length > 0){
+      // Might need to iterate over non-housing buildings
+      for (var i = 0; i < Game.buildings.length; i++){
+        var building = Game.buildings[i];
 
-      if (building.usesLabourCamp && building.needsWorkers()){
-        // send a worker to this building
-        var worker = idleWorkers.shift();
+        if (building.usesLabourCamp && building.needsWorkers()){
+          // send a worker to this building
+          var worker = idleWorkers.shift();
 
-        // not sure why this is ever undefined, but it is sometimes
-        if (worker){
-          worker.assignWorkplace(building);
-          building.addWorker();
+          // not sure why this is ever undefined, but it is sometimes
+          if (worker){
+            worker.assignWorkplace(building);
+            building.addWorker();
 
-          var road = this.findRoad(1);
+            var road = this.findRoad(1);
 
-          Game.addPerson(worker);
-          worker.location = road.xy;
-          worker.moveToBuildingByRoad(building);
+            if (road){
+              Game.addPerson(worker);
+              worker.location = road.xy;
+              worker.moveToBuildingByRoad(building);
+              this.lastWorkerSent = 100;
+            }
+          }
         }
       }
     }
+  }else{
+    this.lastWorkerSent--;
   }
 };
 
@@ -455,6 +501,14 @@ Buildings.silo.prototype.hasRoom = function(amount){
   return total <= this.capacity;
 };
 
+Buildings.silo.prototype.contains = function(what, amount){
+  if (amount === undefined){
+    amount = 1;
+  }
+
+  return this.contents[what] === undefined ? false : this.contents[what] >= amount;
+};
+
 Buildings.silo.prototype.addGoods = function(what){
   for (var type in what){
     if (this.contents[type] === undefined){
@@ -462,7 +516,20 @@ Buildings.silo.prototype.addGoods = function(what){
     }
     this.contents[type] += what[type];
   }
-}
+};
+
+Buildings.silo.prototype.removeGoods = function(what){
+  for (var type in what){
+    if (this.contents[type] === undefined){
+      this.contents[type] = 0;
+    }
+    this.contents[type] -= what[type];
+
+    if (this.contents[type] < 0){
+      this.contents[type] = 0;
+    }
+  }
+};
 
 Buildings.silo.prototype.getText = function(which){
   var base = Buildings.basic.prototype.getText.call(this, which);
@@ -472,9 +539,71 @@ Buildings.silo.prototype.getText = function(which){
       "<br /><br />";
 
     for (var crop in this.contents){
-      base += crop.capitalize() + ": " + this.contents[crop] + "<br />";
+      if (crop !== undefined){
+        base += crop.capitalize() + ": " + this.contents[crop] + "<br />";
+      }
     }
-  }else{
-    return base;
+  }
+
+  return base;
+};
+
+/***********************
+ *   Market Methods    *
+ ***********************/
+Buildings.market.prototype.update = function(){
+  Buildings.basic.prototype.update.call(this);
+
+  if (this.workers > 0){
+    // if we have any workers we should put out a merchant
+    if (this.contents.corn == 0){
+      if (this.state != "waiting_for_goods"){
+        // send the merchant to a nearby silo with food
+        var silo = Game.findBuilding("silo", function(silo){
+          return silo.contains("corn", 200);
+        });
+
+        if (silo){
+          var road = this.findRoad(1);
+
+          if (road){
+            // send the merchant to this silo
+            if (!this.merchant){
+              this.merchant = new Merchant(road.xy, this, false);
+              GameLogic.addPerson(this.merchant);
+            }else{
+              this.merchant.location = road.xy;
+            }
+
+            this.merchant.silo = silo;
+            this.merchant.moveToBuildingByRoad(silo);
+            this.merchant.state = "getting_goods";
+            this.state = "waiting_for_goods";
+          }
+        }
+      }
+    }else if (this.state != "merchant_out"){
+      var road = this.findRoad(1);
+
+      if (road){
+        if (!this.merchant){
+          this.merchant = new Merchant(road.xy, this);
+          GameLogic.addPerson(this.merchant);
+        }else{
+          this.merchant.chooseRandomPath();
+        }
+
+        this.state = "merchant_out";
+
+        // give the merchant some goods to share
+        var amount = Math.min(200, this.contents.corn);
+
+        this.contents.corn -= amount;
+
+        this.merchant.addResources({corn: amount});
+      }
+    }
   }
 };
+
+Buildings.market.prototype.addGoods = Buildings.silo.prototype.addGoods;
