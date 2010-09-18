@@ -18,6 +18,7 @@ Text.en = {
   house_level_2: "This house has water, but still needs some food to upgrade.",
   house_level_3: "This house has food and water.",
   housing_plot: "Housing Plot",
+  improving: "Conditions are improving, this house is upgrading.",
   inaccessible_housing: "Some housing plots are inaccessible.",
   market: "Market",
   must_be_near_road: "This building must be adjacent to a road.",
@@ -31,7 +32,8 @@ Text.en = {
   unemployment: "Unemployment",
   water_hole: "Well",
   water_hole_body: "This is a well, where people can get water.",
-  work_camp: "Work Camp"
+  work_camp: "Work Camp",
+  worsening: "Conditions have gotten worse, this house is downgrading."
 };
 
 Text.fr = {
@@ -43,6 +45,7 @@ Text.fr = {
   house_level_2: "This house has water, but still needs some food to upgrade.",
   house_level_3: "This house has food and water.",
   housing_plot: "Logement",
+  improving: "Conditions are improving, this house is upgrading.",
   inaccessible_housing: "Il y a des logements qui sont inaccessible.",
   market: "Marché",
   must_be_near_road: "Cet édifice doit être adjacent à une rue.",
@@ -55,7 +58,8 @@ Text.fr = {
   silo_body: "Silos are used to store food.",
   unemployment: "Chômage",
   water_hole: "Fontaine",
-  work_camp: "Camp de Travail"
+  work_camp: "Camp de Travail",
+  worsening: "Conditions have gotten worse, this house is downgrading."
 };
 
 Text.reload = function(){

@@ -6,6 +6,13 @@ var Resources = {
     corn_field: {
       file: "buildings/corn-field.png"
     },
+    house_shift_1_2: {
+      file: "buildings/house_shift_1_2.png"
+    },
+    house_shift_2_3: {
+      file: "buildings/house_shift_2_3.png",
+      yOffset: 3
+    },
     hovel: {
       file: "buildings/hovel.png"
     },

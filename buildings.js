@@ -60,6 +60,9 @@ var Buildings = {
     this.isHouse = true;
 
     this.level = 0;
+    this.levelUpgradeTime = 0;
+    this.nextLevel = 0;
+
     this.needs = {
       water: false,
       corn: 0
@@ -202,25 +205,39 @@ Buildings.basic.prototype.findRoad = function(radius, width, height){
 Buildings.plot.capacities = [
   1, 1, 2, 3
 ];
+Buildings.plot.prototype.upgradeTo = function(level){
+  this.levelUpgradeTime = 200;
+  this.nextLevel = level;
+};
+
 Buildings.plot.prototype.update = function(){
   if (this.people === 0){
     this.level = 0;
   }else{
     if (this.level == 0){
+      // jumps to level 1 from 0 are instant
       this.level = 1;
-    }else if (this.level == 1){
-      if (this.needs.water === true){
-        this.level = 2;
-      }
-    }else if (this.level == 2){
-      if (this.needs.water === false){
-        this.level = 1;
-      }else if (this.needs.corn > 0){
-        this.level = 3;
-      }
-    }else if (this.level == 3){
-      if (this.needs.corn === 0){
-        this.level = 2;
+    }else{
+      if (this.nextLevel > 0){
+        if (--this.levelUpgradeTime <= 0){
+          this.level = this.nextLevel;
+          this.nextLevel = 0;
+          this.levelUpgradeTime = 0;
+        }
+      }else if (this.level == 1){
+        if (this.needs.water === true){
+          this.upgradeTo(2);
+        }
+      }else if (this.level == 2){
+        if (this.needs.water === false){
+          this.upgradeTo(1);
+        }else if (this.needs.corn > 0){
+          this.upgradeTo(3);
+        }
+      }else if (this.level == 3){
+        if (this.needs.corn === 0){
+          this.upgradeTo(2);
+        }
       }
     }
   }
@@ -259,21 +276,28 @@ Buildings.plot.prototype.getCapacity = function(person){
 
 Buildings.plot.prototype.updateImage = function(){
   var lastImage = this.image;
-  this.yOffset = 0;
 
-  if (this.level === 0){
+  if (this.nextLevel > 0){
+    var min = Math.min(this.level, this.nextLevel);
+    var max = Math.max(this.level, this.nextLevel);
+    this.image = Resources.images["house_shift_" + min + "_" + max];
+  }else if (this.level === 0){
     this.image = Resources.images.plot;
   }else if (this.level == 1){
     this.image = Resources.images.hovel;
   }else if (this.level == 2){
     this.image = Resources.images.shack;
   }else if (this.level == 3){
-    this.yOffset = Resources.images.hut.yOffset;
     this.image = Resources.images.hut;
   }
 
+  if (this.image.yOffset !== undefined){
+    this.yOffset = this.image.yOffset;
+  }else{
+    this.yOffset = 0;
+  }
+
   if (this.image != lastImage){
-    // TODO: shouldn't call renderBuildings, should trigger a flag instead
     Game.display.tiler.renderBuildings();
   }
 };
@@ -295,7 +319,16 @@ Buildings.plot.prototype.getText = function(which){
   var base = Buildings.basic.prototype.getText.call(this, which);
   
   if (which == "body"){
-    base += "<br /><br />" + t("house_level_" + this.level);
+    base += "<br /><br />";
+    if (this.nextLevel != 0){
+      if (this.nextLevel > this.level){
+        base += t("improving");
+      }else{
+        base += t("worsening");
+      }
+    }else{
+      base += t("house_level_" + this.level);
+    }
   }
 
   return base;
