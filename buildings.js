@@ -421,7 +421,7 @@ Buildings.corn_field.prototype.update = function(){
       this.production++;
 
       var pct = this.getProductionPct();
-      if (pct >= 100 && pct % 10 == 0){
+      if (pct % 10 == 0){
         Game.display.tiler.renderBuildings();
       }
 
@@ -438,10 +438,12 @@ Buildings.corn_field.prototype.update = function(){
 
     if (silo){
       // send the worker to this silo
-      this.production = 0;
-      this.workersHere[0].transportGoodsTo(this.goodsAtProduction, silo);
-      this.state = "waiting";
-      Game.display.tiler.renderBuildings();
+      if (this.workersHere[0].transportGoodsTo(this.goodsAtProduction, silo)){
+        // only do it if a path can be found
+        this.production = 0;
+        this.state = "waiting";
+        Game.display.tiler.renderBuildings();
+      }
     }
   }else{
     // do nothing
@@ -483,39 +485,40 @@ Buildings.corn_field.prototype.render = function(tiler, context){
   var corn = Resources.images.corn;
   var coords;
 
-  if (pct > 10){
+  // render the different cells
+  if (pct >= 10){
     coords = tiler.toScreenCoords(this.location, false);
     context.drawImage(corn.image, coords[0], coords[1]);
   }
-  if (pct > 20){
+  if (pct >= 20){
     coords = tiler.toScreenCoords([this.location[0] + 1, this.location[1]], false);
     context.drawImage(corn.image, coords[0] + 1, coords[1]);
   }
-  if (pct > 30){
+  if (pct >= 30){
     coords = tiler.toScreenCoords([this.location[0] + 2, this.location[1]], false);
     context.drawImage(corn.image, coords[0] + 2, coords[1]);
   }
-  if (pct > 40){
+  if (pct >= 40){
     coords = tiler.toScreenCoords([this.location[0], this.location[1] + 1], false);
     context.drawImage(corn.image, coords[0], coords[1] + 1);
   }
-  if (pct > 50){
+  if (pct >= 50){
     coords = tiler.toScreenCoords([this.location[0] + 1, this.location[1] + 1], false);
     context.drawImage(corn.image, coords[0] + 1, coords[1] + 1);
   }
-  if (pct > 60){
+  if (pct >= 60){
     coords = tiler.toScreenCoords([this.location[0] + 2, this.location[1] + 1], false);
     context.drawImage(corn.image, coords[0] + 2, coords[1] + 1);
   }
-  if (pct > 70){
+  if (pct >= 70){
     coords = tiler.toScreenCoords([this.location[0], this.location[1] + 2], false);
     context.drawImage(corn.image, coords[0], coords[1] + 2);
   }
-  if (pct > 80){
+  if (pct >= 80){
     coords = tiler.toScreenCoords([this.location[0] + 1, this.location[1] + 2], false);
     context.drawImage(corn.image, coords[0] + 1, coords[1] + 2);
   }
-  if (pct > 90){
+  if (pct >= 90){
     coords = tiler.toScreenCoords([this.location[0] + 2, this.location[1] + 2], false);
     context.drawImage(corn.image, coords[0] + 2, coords[1] + 2);
   }

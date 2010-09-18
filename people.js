@@ -104,6 +104,10 @@ Person.prototype.moveToBuildingByRoad = function(target){
     }else{
       this.setNewTarget(this.location);
     }
+
+    return true;
+  }else{
+    return false;
   }
 }
 
@@ -393,12 +397,16 @@ Worker.prototype.assignWorkplace = function(building){
 };*/
 
 Worker.prototype.transportGoodsTo = function(goods, building){
-  this.setState("transporting");
-  this.dropSpot = building;
-  this.goods = goods;
-
   this.location = this.workplace.findRoad(1).xy;
-  this.moveToBuildingByRoad(building);
+
+  if (this.moveToBuildingByRoad(building)){
+    this.setState("transporting");
+    this.dropSpot = building;
+    this.goods = goods;
+
+    return true;
+  }
+  return false;
 };
 
 Worker.prototype.arrived = function(){
@@ -416,8 +424,12 @@ Worker.prototype.arrived = function(){
     // arrived at silo
     this.dropSpot.addGoods(this.goods);
     this.goods = false;
-    this.setState("returning");
-    this.moveToBuildingByRoad(this.workplace);
+
+    if (this.moveToBuildingByRoad(this.workplace)){
+      this.setState("returning");
+    }else{
+      this.setState("waiting_for_return");
+    }
   }else if (this.state == "returning"){
     this.moveToBuilding(this.workplace);
     this.setState("entering");
@@ -430,6 +442,17 @@ Worker.prototype.setState = function(state){
   this.state = state;
   this.setSprite(this.workplace.getWorkerSprite(this.state));
 }
+
+Worker.prototype.update = function(){
+  if (this.state == "waiting_for_return"){
+    // check to see if there is a road
+    if (this.moveToBuildingByRoad(this.workplace)){
+      this.setState("returning");
+    }
+  }
+
+  Person.prototype.update.call(this);
+};
 
 /***********************
  *      Merchant       *
@@ -481,6 +504,7 @@ Merchant.prototype.arrived = function(){
     // get the goods, go back home
     this.silo.removeGoods({corn: 200});
     this.state = "going home";
+    // TODO: handle if there is no path
     this.moveToBuildingByRoad(this.building);
   }else if (this.state == "going home"){
     this.building.addGoods({corn: 200});
