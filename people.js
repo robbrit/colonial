@@ -167,81 +167,129 @@ Person.prototype.nextTile = function(){
   }
 };
 
+/******************
+ *    Fetcher     *
+ ******************/
+function Fetcher(sprite, home){
+  if (home){
+    Person.call(this, sprite, home.findRoad(1).xy);
+  }else{
+    Person.call(this, sprite, null);
+  }
+  this.building = home;
+  this.pauseTime = 90;
+
+  // by default we're hanging out at home
+  this.goInHome();
+};
+Fetcher.prototype = new Person();
+
+Fetcher.prototype.goInHome = function(){
+  this.state = "waiting at home";
+  this.hide();
+
+  // when workers arrive back home, make them
+  // wait a little while
+  this.pauseTimeLeft = this.pauseTime;
+};
+
+Fetcher.prototype.moveToBuilding = function(building){
+  if (this.state == "at home"){
+    this.goOutside();
+  }
+  this.targetBuilding = building;
+  this.state = "to target";
+  this.moveToBuildingByRoad(building);
+};
+
+Fetcher.prototype.arrived = function(){
+  Person.prototype.arrived.call(this);
+
+  if (this.state == "to target"){
+    if (this.arrivedAtBuilding(this.targetBuilding)){
+      this.goHome();
+    }
+  }else if (this.state == "to home"){
+    this.goInHome();
+  }
+};
+
+Fetcher.prototype.update = function(){
+  Person.prototype.update.call(this);
+
+  if (this.state == "waiting at home"){
+    if (--this.pauseTimeLeft <= 0){
+      this.state = "at home";
+      this.readyToGo();
+    }
+  }
+};
+
+Fetcher.prototype.goHome = function(){
+  this.state = "to home";
+  this.moveToBuildingByRoad(this.building);
+};
+
+Fetcher.prototype.goOutside = function(){
+  this.location = this.building.findRoad(1).xy;
+};
+
+// override this method for workers that need to do something
+// special in that spot. The method returns false if the overridden
+// version handles the next state and location.
+Fetcher.prototype.arrivedAtBuilding = function(which){ return true; };
+
+// override this one for when the workers wait time is done.
+Fetcher.prototype.readyToGo = function(){};
 
 /******************
  *    Wanderer    *
  ******************/
-function Wanderer(sprite, start, autoWander){
-  Person.call(this, sprite, start);
+function Wanderer(sprite, home){
+  Fetcher.call(this, sprite, home);
 
   // keep track of the spaces we've wandered in
   this.wanderSize = 20;
-
-  if (autoWander === undefined || autoWander){
-    this.chooseRandomPath();
-  }else{
-    this.setNewTarget(false);
-  }
+  this.setNewTarget(false);
 
   this.speed = 0.08;
-  this.waitTime = 250; // this should be adjustable based on the building's employment level
 }
-Wanderer.prototype = new Person();
+Wanderer.prototype = new Fetcher();
 
-Wanderer.serviceUpdate = function(service){
-  return function(){
-    if (this.state != "at home"){
-      service(this);
-
-      // do regular wandering stuff
-      Wanderer.prototype.update.call(this);
-    }else{
-      if (this.waitTimeLeft-- <= 0){
-        this.chooseRandomPath();
-      }
-    }
-  };
+Wanderer.prototype.readyToGo = function(){
+  this.wander();
 };
 
 Wanderer.prototype.arrived = function() {
-  Person.prototype.arrived.call(this);
+  Fetcher.prototype.arrived.call(this);
 
-  if (this.state == "going home"){
-    // note: default wanderers will never have this,
-    // only ones that have a home will end up in this
-    // state
-    this.reachedHome();
-  }else if (this.state == "wandering"){
-    if (this.building !== undefined){
-      this.goHome();
-    }else{
-      // other wanderers should just continue wandering
-      this.chooseRandomPath();
+  if (this.state == "wandering"){
+    // arrived at the end of the wander list
+    this.goHome();
+  }
+};
+
+/* This method is for workers that wander around providing
+ * some service to locals.
+ */
+Wanderer.serviceUpdate = function(service){
+  return function(){
+    if (this.state == "wandering"){
+      service.call(this);
     }
-  }
+
+    // do regular wandering stuff
+    Wanderer.prototype.update.call(this);
+  };
 };
 
-Wanderer.prototype.goHome = function(){
-  // for wanderers that have a building, just send them back
-  var targetRoad = this.building.findRoad(1);
-
-  if (targetRoad){
-    this.targetQueue = AI.RoadAStar(this, this.location, targetRoad.xy);
-    this.state = "going home";
-  }
-};
-
-Wanderer.prototype.reachedHome = function(){
-  // go inside
-  this.hide();
-  this.state = "at home";
-  this.setNewTarget(false);
-  this.waitTimeLeft = this.waitTime;
-};
-
-Wanderer.prototype.chooseRandomPath = function(){
+Wanderer.prototype.wander = function(){
   this.show();
   this.state = "wandering";
+
+  // put myself on a road nearby
+  this.goOutside();
+  
   this.targetQueue = this.getRandomRoads();
 }
 Wanderer.prototype.getRandomRoads = function(){
@@ -291,6 +339,10 @@ Wanderer.prototype.getRandomRoads = function(){
   return path;
 }
 
+
+/******************
+ *    Immigrant   *
+ ******************/
 function Immigrant(start, target){
   Person.call(this, Resources.sprites.immigrant, start);
 
@@ -324,47 +376,46 @@ Immigrant.prototype.update = function(){
   }
 };
 
-function JobFinder(start, building){
-  Wanderer.call(this, Resources.sprites.jobFinder, start);
-
-  this.building = building;
-}
-
 /********************
  *    Job Finder    *
  ********************/
+function JobFinder(building){
+  Wanderer.call(this, Resources.sprites.jobFinder, building);
+
+  this.building = building;
+}
 JobFinder.prototype = new Wanderer();
 
-JobFinder.prototype.update = Wanderer.serviceUpdate(function(me){
-  if (me.building.needsWorkers()){
+JobFinder.prototype.update = Wanderer.serviceUpdate(function(){
+  if (this.building.needsWorkers()){
     // look around for houses
-    var house = me.findHouses();
+    var house = this.findHouses();
 
     var unemp;
     if (house && house.people > 0 && GameLogic.unemployment() > 0){
-      me.building.addWorker();
+      this.building.addWorker();
       GameLogic.addJob();
     }
   }else{
     // remove me
-    me.hide();
-    Game.removePerson(me);
+    this.hide();
+    Game.removePerson(this);
   }
 });
 
 /***********************
  *    Water Carrier    *
  ***********************/
-function WaterCarrier(start, building){
-  Wanderer.call(this, Resources.sprites.waterCarrier, start);
+function WaterCarrier(building){
+  Wanderer.call(this, Resources.sprites.waterCarrier, building);
 
   this.building = building;
 }
 WaterCarrier.prototype = new Wanderer();
 
-WaterCarrier.prototype.update = Wanderer.serviceUpdate(function(me){
+WaterCarrier.prototype.update = Wanderer.serviceUpdate(function(){
   // give water to nearby houses
-  var houses = me.findHouses(2, true);
+  var houses = this.findHouses(2, true);
 
   for (var i = 0; i < houses.length; i++){
     houses[i].addResource("water");
@@ -391,10 +442,6 @@ Worker.prototype.assignWorkplace = function(building){
   this.workplace = building;
   this.setState("on_road");
 };
-
-/*Worker.prototype.update = function(){
-  Person.prototype.update.call(this);
-};*/
 
 Worker.prototype.transportGoodsTo = function(goods, building){
   this.location = this.workplace.findRoad(1).xy;
@@ -435,7 +482,6 @@ Worker.prototype.arrived = function(){
     this.setState("entering");
     this.workplace.state = "working";
   }
-
 }
 
 Worker.prototype.setState = function(state){
@@ -457,60 +503,46 @@ Worker.prototype.update = function(){
 /***********************
  *      Merchant       *
  ***********************/
-function Merchant(start, building, autoWander){
-  Wanderer.call(this, Resources.sprites.merchant, start, autoWander);
+function Merchant(building){
+  Wanderer.call(this, Resources.sprites.merchant, building);
 
-  this.building = building;
   this.resources = {};
   this.visited = [];
 }
 Merchant.prototype = new Wanderer();
 
-Merchant.prototype.serviceUpdate = Wanderer.serviceUpdate(function(me){
+Merchant.prototype.update = Wanderer.serviceUpdate(function(){
   // give the resources I'm carrying to nearby houses
-  if (me.resources.corn){
-    var houses = me.findHouses(2, true);
+  if (this.resources.corn){
+    var houses = this.findHouses(2, true);
 
     var amount;
 
     for (var i = 0; i < houses.length; i++){
-      if (me.visited.indexOf(houses[i]) == -1){
-        amount = Math.min(5, me.resources.corn);
+      if (this.visited.indexOf(houses[i]) == -1){
+        amount = Math.min(5, this.resources.corn);
 
-        me.resources.corn -= amount;
+        this.resources.corn -= amount;
 
         houses[i].addResource("corn", amount);
-        me.visited.push(houses[i]);
+        this.visited.push(houses[i]);
       }
     }
 
-    if (me.resources.corn === 0){
+    if (this.resources.corn === 0){
       // time to go home
-      me.goHome();
+      this.goHome();
     }
   }
 });
 
-Merchant.prototype.update = function(){
-  if (this.state == "wandering" || this.state == "at home"){
-    this.serviceUpdate();
-  }else{
-    Person.prototype.update.call(this);
-  }
-};
-
-Merchant.prototype.arrived = function(){
-  if (this.state == "getting_goods"){
-    // get the goods, go back home
+Merchant.prototype.arrivedAtBuilding = function(which){
+  if (which == this.targetBuilding){
+    // arrived at target
+    // TODO: should try to take out 200 but can't always
     this.silo.removeGoods({corn: 200});
-    this.state = "going home";
-    // TODO: handle if there is no path
-    this.moveToBuildingByRoad(this.building);
-  }else if (this.state == "going home"){
+  }else if (which == this.building){
     this.building.addGoods({corn: 200});
-    Wanderer.prototype.arrived.call(this);
-  }else{
-    Wanderer.prototype.arrived.call(this);
   }
 };
 

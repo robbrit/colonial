@@ -14,6 +14,9 @@
 
 <div class = "sidebar">
   <div class = "toolbar">
+    <div>
+      Build
+    </div>
     <a href = "#" onclick = "Game.Controls.selectBuilding('destroy'); return false" class = "building-btn">
       <img src = "images/util/red-x.png" id = "btn_destroy" alt = "" />
     </a>
@@ -54,10 +57,10 @@
     </div>
   </div>
 </div>
-<a href = "#" onclick = "$('#help').toggle()">Help</a><br />
+<a href = "#" onclick = "$('#help-' + Text.lang).toggle()">Help</a><br />
 <a href = "#" onclick = "Text.setLang('en')">en</a> 
 <a href = "#" onclick = "Text.setLang('fr')">fr</a> 
-<div id = "help">
+<div id = "help-en" class = "help">
   <h2>Housing</h2>
   <p>In order to get people into your city, you need to build houses. You do this by placing
   housing plots near roads. Immigrants will then come in and move in after a certain period of
@@ -65,10 +68,28 @@
   <p>Houses can also upgrade once you provide them with basic necessities. Better houses allow
   for more people to move in.</p>
   <h2>Water</h2>
-  <p>Everybody needs water to live. In order to get water to the people, build a water supply
+  <p>Everybody needs water to live. In order to get water to the people, build a well
   near their houses. Once workers are found, a water carrier will periodically come out of the
-  water supply and re-fill the people's houses.</p>
+  well and re-fill the people's houses.</p>
+  <h2>Food</h2>
+  <p>Once people have some water, they will need something to eat. However, getting food is a lot
+  more complicated than getting water. You need a supply of labourers to work the fields, a place
+  to store the food, and then a place to distribute the food.</p>
+  <h3>Food Production</h3>
+  <p>To produce food, you need to build farms. Since the people in your town don't yet know how to
+  grow anything else, they can only produce corn. Place some corn farms around.</p>
+  <p>Even with corn farms, you need to provide the fields with a supply of workers. Build a work
+  camp to accomplish this.</p>
+  <h3>Food Storage</h3>
+  <p></p>
+  <h3>Food Distribution</h3>
+  <p></p>
 </div>
+<div id = "help-fr" class = "help">
+  Traduction bientôt...
+</div>
+<div class = "clear"></div>
+Use the arrow keys to move around the map.
 <!-- millions of JS includes -->
 <script type = "text/javascript" src = "extend.js"></script>
 <script type = "text/javascript" src = "jquery-1.4.2.min.js"></script>

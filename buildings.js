@@ -116,8 +116,9 @@ Buildings.basic.prototype.update = function() {
     var road = this.findRoad(1);
 
     if (road){
-      this.jobFinder = new JobFinder(road.xy, this);
+      this.jobFinder = new JobFinder(this);
       GameLogic.addPerson(this.jobFinder);
+      this.jobFinder.wander();
     }
   }
 };
@@ -343,14 +344,10 @@ Buildings.water_hole.prototype.update = function(){
   // if we have any workers we should put out a water carrier
   if (this.workers > 0){
     if (this.state == "carrier_here"){
-      var road = this.findRoad(1);
-
       // TODO: should randomly place water carrier based on how well-staffed we are
-      if (road){
-        if (!this.carrier){
-          this.carrier = new WaterCarrier(road.xy, this);
-          GameLogic.addPerson(this.carrier);
-        }
+      if (!this.carrier){
+        this.carrier = new WaterCarrier(this);
+        GameLogic.addPerson(this.carrier);
       }
     }
   }
@@ -605,7 +602,7 @@ Buildings.market.prototype.update = function(){
           if (road){
             // send the merchant to this silo
             if (!this.merchant){
-              this.merchant = new Merchant(road.xy, this, false);
+              this.merchant = new Merchant(this);
               GameLogic.addPerson(this.merchant);
             }else{
               this.merchant.location = road.xy;
@@ -623,7 +620,7 @@ Buildings.market.prototype.update = function(){
 
       if (road){
         if (!this.merchant){
-          this.merchant = new Merchant(road.xy, this);
+          this.merchant = new Merchant(this);
           GameLogic.addPerson(this.merchant);
         }else{
           this.merchant.chooseRandomPath();
